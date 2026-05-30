@@ -6,7 +6,6 @@ set -euo pipefail
 
 SCRATCH_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRATCH_DIR/select_gpu.sh"
-export SGLANG_DIFFUSION_ATTENTION_BACKEND=TORCH_SDPA
 
 MODELS_DIR="/miele/brian/modelscope"
 RESULTS_DIR="$SCRATCH_DIR/results"
@@ -27,6 +26,7 @@ run_gen() {
         --model-path "$model_path" \
         --prompt "$PROMPT" \
         --output-file-path "$outfile" \
+        --attention-backend torch_sdpa \
         --seed 42 \
         "$@"
     echo "  -> saved: $outfile"
@@ -37,15 +37,13 @@ run_gen "flux1_dev" \
     "$MODELS_DIR/black-forest-labs/FLUX.1-dev" \
     --num-inference-steps 50
 
-# Z-Image
-run_gen "z_image" \
-    "$MODELS_DIR/Tongyi-MAI/Z-Image" \
-    --num-inference-steps 50
-
-# Z-Image-Turbo (distilled — 4 steps is its native range, but match 50 for comparison)
-run_gen "z_image_turbo" \
-    "$MODELS_DIR/Tongyi-MAI/Z-Image-Turbo" \
-    --num-inference-steps 50
+# Z-Image requires CUTLASS DSL which needs cuda-python 13.x → CUDA 13 runtime.
+# Driver 560.35.05 only supports CUDA 12.6, so Z-Image cannot run on this machine.
+# Uncomment when driver is updated to support CUDA 13.
+# run_gen "z_image" \
+#     "$MODELS_DIR/Tongyi-MAI/Z-Image" \
+#     --num-inference-steps 50 \
+#     --guidance-scale 1
 
 echo ""
 echo "Done. Results:"
