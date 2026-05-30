@@ -72,5 +72,23 @@ test/manual/test_progressive_flux.py    # Manual tier (needs GPU + model)
 - Patch `ctx.scheduler.timesteps[transition_step]` to `t_eff * 1000`
 - Call `_reset_scheduler_loop_state(ctx.scheduler)` and set `_step_index = transition_step`
 
+## Bug Fixes (found during first run)
+1. **InferenceMode in-place update** — `scheduler.sigmas/timesteps` and `ctx.timesteps` are inference tensors; cloned them once before the stage loop when `rewind=True`.
+2. **`raw_latent_shape` stale after progressive init** — we overwrote `batch.latents` with the low-res initial noise and set `raw_latent_shape` to `[1, 1024, 64]`; `maybe_unpad_latents` then truncated the final full-res `[1, 4096, 64]` latent to 1024 tokens. Fixed by updating `batch.raw_latent_shape = ctx.latents.shape` before `_finalize_denoising_loop`.
+3. **`SamplingParams.add_cli_args` missing progressive fields** — new fields aren't auto-discovered; added explicit `add_argument` entries for `--progressive-mode/levels/delta`.
+
+## Benchmark Results (FLUX.1-dev, 1024×1024, 20 steps, H100/A100)
+
+| Config | Stage split | Token-steps | Wall-clock | Denoising | Speedup |
+|--------|------------|-------------|-----------|-----------|---------|
+| fullres | 20 @ 128×128 | 81920 | 24.49s | 22.46s | 1.00× |
+| dct_rewind L1 δ=0.01 | 8@64²+12@128² | 57344 | 19.46s | 17.86s | **1.26×** |
+| dct_rewind L1 δ=0.05 | 12@64²+8@128² | 45056 | 17.77s | 16.18s | **1.38×** |
+| dct_plain L1 δ=0.01 | 8@64²+12@128² | 57344 | 21.14s | 19.57s | 1.16× |
+| dct_rewind L2 δ=0.01 | 4@32²+4@64²+12@128² | — | CUDA error | — | — |
+
+**Known issue:** L2 (3-stage) hits a CUDA illegal memory access during stage 3. Under investigation.
+
 ## Change Log
 - 2026-05-29: Initial implementation
+- 2026-05-30: Three bug fixes; first successful end-to-end run with 1.26–1.38× denoising speedup
