@@ -31,20 +31,20 @@ run_gen() {
     echo "  -> saved: $outfile"
 }
 
-# FLUX.1-dev (full quality, ~20 steps)
+# FLUX.1-dev
 run_gen "flux1_dev" \
     "$MODELS_DIR/black-forest-labs/FLUX.1-dev" \
-    --num-inference-steps 20
+    --num-inference-steps 50
 
-# Z-Image (full model)
+# Z-Image
 run_gen "z_image" \
     "$MODELS_DIR/Tongyi-MAI/Z-Image" \
-    --num-inference-steps 20
+    --num-inference-steps 50
 
-# Z-Image-Turbo (fast, 4 steps sufficient)
+# Z-Image-Turbo (distilled — 4 steps is its native range, but match 50 for comparison)
 run_gen "z_image_turbo" \
     "$MODELS_DIR/Tongyi-MAI/Z-Image-Turbo" \
-    --num-inference-steps 4
+    --num-inference-steps 50
 
 echo ""
 echo "Done. Results:"
