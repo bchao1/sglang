@@ -500,6 +500,7 @@ TORCH_LIBRARY_FRAGMENT(sgl_kernel, m) {
       "stride_a, Tensor stride_b, Tensor stride_d, Tensor problem_sizes, Tensor expert_offsets, Tensor workspace) -> "
       "()");
   m.impl("es_fp8_blockwise_scaled_grouped_mm", &es_fp8_blockwise_scaled_grouped_mm);
+#if defined(SGL_KERNEL_HAVE_SM100_MXFP8)
   m.def(
       "es_sm100_mxfp8_blockscaled_grouped_mm(Tensor a, Tensor b, Tensor sfa, Tensor sfb, Tensor d, Tensor "
       "problem_sizes, Tensor expert_offsets, Tensor blockscale_offsets) -> ()");
@@ -508,6 +509,7 @@ TORCH_LIBRARY_FRAGMENT(sgl_kernel, m) {
       "es_sm100_mxfp8_blockscaled_grouped_quant(Tensor input, Tensor problem_sizes, Tensor expert_offsets, Tensor "
       "blockscale_offsets, Tensor quant_output, Tensor scale_factor) -> () ");
   m.impl("es_sm100_mxfp8_blockscaled_grouped_quant", &es_sm100_mxfp8_blockscaled_grouped_quant);
+#endif  // SGL_KERNEL_HAVE_SM100_MXFP8
 }
 
 REGISTER_EXTENSION(common_ops)

@@ -25,6 +25,16 @@ enable_language(CUDA)
 find_package(CUDAToolkit REQUIRED)
 set_property(GLOBAL PROPERTY CUDA_SEPARABLE_COMPILATION ON)
 
+# CMAKE_CUDA_COMPILER_VERSION is the authoritative version in modern CMake;
+# CUDA_VERSION is the legacy variable set by the old find_package(CUDA) API.
+# Populate CUDA_VERSION from the modern variable if it is not already set.
+if (NOT CUDA_VERSION AND CMAKE_CUDA_COMPILER_VERSION)
+    # Caffe2/Torch cmake compares CUDA_VERSION against the header version string
+    # which is "major.minor" only (e.g. "12.6").  Truncate the full nvcc version
+    # string (e.g. "12.6.85") to major.minor to avoid a spurious version mismatch.
+    string(REGEX MATCH "^[0-9]+\\.[0-9]+" CUDA_VERSION "${CMAKE_CUDA_COMPILER_VERSION}")
+endif()
+
 message(STATUS "Detected CUDA_VERSION=${CUDA_VERSION}")
 if ("${CUDA_VERSION}" VERSION_GREATER_EQUAL "13.0")
     message("CUDA_VERSION ${CUDA_VERSION} >= 13.0")
@@ -234,7 +244,10 @@ if ("${CUDA_VERSION}" VERSION_GREATER_EQUAL "12.8" OR SGL_KERNEL_ENABLE_SM100A)
 endif()
 
 if ("${CUDA_VERSION}" VERSION_GREATER_EQUAL "12.4")
-    set(SGL_KERNEL_ENABLE_FA3 ON)
+    # Only auto-enable FA3 if the user has not explicitly set it to OFF.
+    if (NOT DEFINED CACHE{SGL_KERNEL_ENABLE_FA3})
+        set(SGL_KERNEL_ENABLE_FA3 ON)
+    endif()
     list(APPEND SGL_KERNEL_CUDA_FLAGS
         "-gencode=arch=compute_90a,code=sm_90a"
     )
@@ -263,8 +276,6 @@ set(SOURCES
     "csrc/elementwise/pos_enc.cu"
     "csrc/elementwise/topk.cu"
     "csrc/expert_specialization/es_fp8_blockwise.cu"
-    "csrc/expert_specialization/es_sm100_mxfp8_blockscaled.cu"
-    "csrc/expert_specialization/es_sm100_mxfp8_blockscaled_group_quant.cu"
 
     "csrc/gemm/awq_kernel.cu"
     "csrc/gemm/bmm_fp8.cu"
@@ -316,6 +327,17 @@ set(SOURCES
     "${repo-flash-attention_SOURCE_DIR}/csrc/flash_attn/src/flash_fwd_sparse_hdim128_fp16_sm80.cu"
     "${repo-flash-attention_SOURCE_DIR}/csrc/flash_attn/flash_sparse_api.cpp"
 )
+
+# SM100 MX-FP8 sources require __nv_fp8_e8m0 / __nv_cvt_float_to_e8m0 which
+# were introduced in CUDA 13.0.  Only add them when the toolkit is new enough.
+if ("${CUDA_VERSION}" VERSION_GREATER_EQUAL "13.0" OR SGL_KERNEL_ENABLE_SM100A)
+    list(APPEND SOURCES
+        "csrc/expert_specialization/es_sm100_mxfp8_blockscaled.cu"
+        "csrc/expert_specialization/es_sm100_mxfp8_blockscaled_group_quant.cu"
+    )
+    # Signal to common_extension.cc that these ops are available.
+    add_compile_definitions(SGL_KERNEL_HAVE_SM100_MXFP8=1)
+endif()
 
 set(INCLUDES
     ${repo-cutlass_SOURCE_DIR}/include
@@ -505,7 +527,11 @@ target_link_libraries(spatial_ops PRIVATE ${TORCH_LIBRARIES} c10 cuda)
 install(TARGETS spatial_ops LIBRARY DESTINATION sgl_kernel)
 
 # ============================ Extra Install: FLashMLA ============================= #
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/flashmla.cmake)
+# FlashMLA is Hopper (SM90) only. Allow opting out for pre-SM90 builds.
+option(SGL_KERNEL_ENABLE_FLASHMLA "Build FlashMLA (SM90/SM100 only)" ON)
+if (SGL_KERNEL_ENABLE_FLASHMLA)
+    include(${CMAKE_CURRENT_LIST_DIR}/cmake/flashmla.cmake)
+endif()
 
 # ============================ Extra Install: triton kernels ============================= #
 install(DIRECTORY "${repo-triton_SOURCE_DIR}/python/triton_kernels/triton_kernels/"

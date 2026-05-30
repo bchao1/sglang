@@ -6,10 +6,17 @@ from sgl_kernel.debug_utils import maybe_wrap_debug_kernel
 
 try:
     from sgl_kernel import flash_ops
-except:
-    raise ImportError(
-        "Can not import FA3 in sgl_kernel. Please check your installation."
-    )
+    _flash_ops_available = True
+except Exception:
+    flash_ops = None
+    _flash_ops_available = False
+
+
+def _require_flash_ops():
+    if not _flash_ops_available:
+        raise ImportError(
+            "Can not import FA3 in sgl_kernel. Please check your installation."
+        )
 
 
 @lru_cache(maxsize=1)
@@ -159,6 +166,7 @@ def flash_attn_with_kvcache(
             normalization factor).
     """
 
+    _require_flash_ops()
     assert k_cache.stride(-1) == 1, "k_cache must have contiguous last dimension"
     assert v_cache.stride(-1) == 1, "v_cache must have contiguous last dimension"
     if softmax_scale is None:
@@ -260,6 +268,7 @@ def flash_attn_varlen_func(
     out=None,
 ):
 
+    _require_flash_ops()
     if not is_fa3_supported():
         raise NotImplementedError(
             "flash_attn at sgl-kernel is only supported on sm90 and above"
