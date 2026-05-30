@@ -6,6 +6,7 @@ set -euo pipefail
 
 SCRATCH_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRATCH_DIR/select_gpu.sh"
+export SGLANG_DIFFUSION_ATTENTION_BACKEND=TORCH_SDPA
 
 MODELS_DIR="/miele/brian/modelscope"
 RESULTS_DIR="$SCRATCH_DIR/results"
