@@ -98,13 +98,20 @@ run_gen() {
 
     local total_s denoise_s avg_s
     total_s=$(grep -oP "generated successfully in \K[\d.]+" "$logfile" || echo "NA")
-    # progressive denoising done in Xs; fallback to average-time-per-step * steps
-    denoise_s=$(grep -oP "Progressive denoising done in \K[\d.]+" "$logfile" \
-                 || { avg=$(grep -oP "average time per step: \K[\d.]+" "$logfile" || echo "0");
-                      echo "$avg * $STEPS" | bc -l 2>/dev/null || echo "NA"; })
+    # DiT denoising loop time only (excludes text encoding, VAE decode, model load).
+    # Progressive runs log "Progressive denoising done in X.XXs" directly.
+    # Fullres runs: denoising_start/end in DenoisingStage cover the step loop only;
+    # "average time per step: X.XXs" × n_steps gives the same window.
     avg_s=$(grep -oP "average time per step: \K[\d.]+" "$logfile" || echo "NA")
+    if prog_done=$(grep -oP "Progressive denoising done in \K[\d.]+" "$logfile" 2>/dev/null); then
+        denoise_s="$prog_done"
+    elif [[ "$avg_s" != "NA" ]]; then
+        denoise_s=$(echo "scale=2; $avg_s * $STEPS" | bc -l)
+    else
+        denoise_s="NA"
+    fi
     echo -e "${label}\t${total_s}\t${denoise_s}\t${avg_s}" >> "$TIMING_LOG"
-    echo "  ✓  total=${total_s}s  denoise=${denoise_s}s  avg=${avg_s}s/step"
+    echo "  ✓  total=${total_s}s  denoise_loop=${denoise_s}s  avg=${avg_s}s/step"
 }
 
 # =============================================================================
@@ -193,14 +200,19 @@ echo "Timing (raw):"
 column -t -s $'\t' "$TIMING_LOG"
 echo ""
 
-# Speedup relative to A1 fullres
-A1_total=$(grep "^A1_fullres" "$TIMING_LOG" | awk '{print $2}')
-if [[ -n "$A1_total" && "$A1_total" != "NA" ]]; then
-    echo "Speedup vs A1_fullres (${A1_total}s):"
-    while IFS=$'\t' read -r run_id total _ _; do
-        [[ "$run_id" == "run_id" || "$total" == "NA" ]] && continue
-        speedup=$(echo "scale=2; $A1_total / $total" | bc)
-        printf "  %-40s  %6.1fs  %sx\n" "$run_id" "$total" "$speedup"
+# Speedup from DiT denoising loop only (column 3 = denoise_s).
+# This excludes text encoding, model loading, VAE decode — those are fixed
+# overhead and identical across all runs.  Speedup should only reflect
+# how much faster the DiT forward passes run.
+A1_denoise=$(grep "^A1_fullres" "$TIMING_LOG" | awk -F'\t' '{print $3}')
+if [[ -n "$A1_denoise" && "$A1_denoise" != "NA" ]]; then
+    echo "Speedup vs A1_fullres DiT loop (${A1_denoise}s):"
+    printf "  %-42s  %8s  %8s  %8s\n" "run_id" "total_s" "denoise_s" "speedup"
+    printf "  %-42s  %8s  %8s  %8s\n" "------" "-------" "---------" "-------"
+    while IFS=$'\t' read -r run_id total denoise avg; do
+        [[ "$run_id" == "run_id" || "$denoise" == "NA" || "$denoise" == "denoise_s" ]] && continue
+        speedup=$(echo "scale=2; $A1_denoise / $denoise" | bc 2>/dev/null || echo "?")
+        printf "  %-42s  %8.1f  %9.2f  %7sx\n" "$run_id" "${total:-0}" "${denoise:-0}" "$speedup"
     done < "$TIMING_LOG"
 fi
 
