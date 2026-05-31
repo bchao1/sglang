@@ -99,13 +99,13 @@ run_gen() {
         2>&1 | tee "$logfile"
 
     local total_s denoise_s avg_s
-    total_s=$(grep -oP "generated successfully in \K[\d.]+" "$logfile" || echo "NA")
+    # Strip ANSI escape codes before grepping (the logger wraps numbers in colour codes).
+    local clean_log
+    clean_log=$(sed 's/\x1b\[[0-9;]*m//g' "$logfile")
+    total_s=$(echo "$clean_log" | grep -oP "generated successfully in \K[\d.]+" || echo "NA")
     # DiT denoising loop time only (excludes text encoding, VAE decode, model load).
-    # Progressive runs log "Progressive denoising done in X.XXs" directly.
-    # Fullres runs: denoising_start/end in DenoisingStage cover the step loop only;
-    # "average time per step: X.XXs" × n_steps gives the same window.
-    avg_s=$(grep -oP "average time per step: \K[\d.]+" "$logfile" || echo "NA")
-    if prog_done=$(grep -oP "Progressive denoising done in \K[\d.]+" "$logfile" 2>/dev/null); then
+    avg_s=$(echo "$clean_log" | grep -oP "average time per step: \K[\d.]+" || echo "NA")
+    if prog_done=$(echo "$clean_log" | grep -oP "Progressive denoising done in \K[\d.]+" 2>/dev/null | head -1); then
         denoise_s="$prog_done"
     elif [[ "$avg_s" != "NA" ]]; then
         denoise_s=$(echo "scale=2; $avg_s * $STEPS" | bc -l)
@@ -163,10 +163,15 @@ if [[ "$GROUP" == "all" || "$GROUP" == "D" ]]; then
 
     # D1: fullres + torch.compile
     # torch.compile fuses and optimizes the transformer forward graph.
-    # Incompatible with progressive (sequence length changes between stages),
-    # so this is the best-effort fullres baseline for head-to-head comparison.
+    # Requires PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid OOM
+    # during Triton kernel compilation on A6000 (compile buffers + 22GB model).
+    # First step is slow (~127s Triton autotune); subsequent steps are ~3% faster.
+    # set +e so a compile OOM does not abort the whole script.
+    set +e
+    PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True \
     run_gen "D1_fullres_compile" \
         --enable-torch-compile
+    set -e
 
     # D2: progressive L1 δ=0.05 (no compile — incompatible) vs D1 above
     # This is the apples-to-apples comparison: fullres+compile vs prog+no-compile.
