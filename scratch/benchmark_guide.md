@@ -8,16 +8,20 @@ to interpret them.  Keep it updated as new experiments are added.
 
 ## Quick Start
 ```bash
-# Full suite (all groups, 50 steps, seed 42)
+# Full speed benchmark (Groups A + D, 50 steps, seed 42)
 bash scratch/test_progressive_benchmark.sh
 
 # Single group
 bash scratch/test_progressive_benchmark.sh --group A
+bash scratch/test_progressive_benchmark.sh --group D
 
 # Custom steps / seed
 bash scratch/test_progressive_benchmark.sh --steps 20 --seed 0
 
-# Legacy sweep (various progressive configs, original script)
+# Color/cinematic quality experiment (10 prompts, fullres vs progressive)
+bash scratch/test_quality_benchmark.sh
+
+# Legacy sweep (various progressive configs)
 bash scratch/test_progressive_gen.sh --steps 50
 ```
 
@@ -48,8 +52,14 @@ match that by disabling offload.
 | Group | Config | Purpose |
 |---|---|---|
 | **A** | Fullres + Progressive, GPU-resident, no opts | Core comparison; mirrors paper setup |
-| **B** | Fullres + TeaCache | Best-effort fullres; sets the competitive bar |
-| **C** | Progressive + TeaCache | Compatibility test; may fail if TeaCache cache state is not reset at stage transitions |
+| **D** | Fullres + torch.compile vs Progressive (no compile) | Fairness test: best-effort fullres vs progressive without incompatible opts |
+
+> **Note on omitted groups:**
+> - **TeaCache (Groups B/C)** — `FluxTransformer2DModel.forward()` does not call
+>   `TeaCacheMixin` hooks.  `--enable-teacache` is a silent no-op for FLUX.1.
+>   TeaCache tests omitted until FLUX TeaCache is implemented.
+> - **STA (Sliding Tile Attention)** — not implemented for FLUX.1 in the current
+>   codebase.  No `--enable-sta` flag exists.
 
 ### Configs Within Group A
 
@@ -80,16 +90,11 @@ speedup = A1_total_s / run_total_s
 
 ### Key comparisons
 - **A1 vs A2/A3/A4**: Does progressive outperform fullres without any optimization?
-- **B1 vs A2**: Does fullres + TeaCache beat progressive without TeaCache?
-  - If B1 < A2: combine both (Group C)
-  - If B1 > A2: progressive alone is competitive
-- **C1/C2 vs A2/A3**: Does adding TeaCache to progressive help or break things?
-
-### Compatibility checks
-- If Group C produces wrong images (black, artifacts) or errors: TeaCache is
-  **incompatible** with progressive.  Fix: reset TeaCache state in
-  `_on_resolution_change` hook.
-- If Group C produces correct images: compare timing to confirm additive benefit.
+- **D1 vs A3**: Does fullres + torch.compile beat progressive (no compile)?
+  - If D1 < A3: progressive is competitive even without compile.
+  - If D1 > A3: progressive still achieves similar quality at lower cost.
+- **D2 == A3**: D2 is a control (same config as A3) run during the D session to
+  confirm reproducibility.
 
 ---
 
@@ -119,22 +124,59 @@ run_gen "A_prog_L1_dct_plain" \
 
 | Optimization | Fullres | Progressive | Notes |
 |---|---|---|---|
-| TeaCache | ✅ | ⚠️ Needs test | Must reset TeaCache state at stage transition |
-| Cache-Dit | ✅ | ❌ Broken | Caches per step count; sequence-length change invalidates cache |
-| STA (Sliding Tile Attn) | ✅ | ❌ Broken | Tile config computed for initial sequence length |
-| torch.compile | ✅ | ❌ Broken | Fixed sequence length in compiled kernel |
+| **torch.compile** | ✅ | ❌ Broken | Fixed sequence length in compiled kernel; incompatible with stage transition |
+| TeaCache | ❌ Not impl. | ❌ Not impl. | `FluxTransformer2DModel.forward()` does not call `TeaCacheMixin` hooks — no-op for FLUX |
+| STA (Sliding Tile Attn) | ❌ Not impl. | ❌ Not impl. | No `--enable-sta` flag exists for FLUX in current codebase |
+| Cache-Dit | ✅ | ❌ Broken | Step cache indexed by step count; stage-1 short-seq cache incompatible with stage-2 |
 | Layerwise offload | ✅ | ✅ | Component-level, unaffected |
 | LoRA | ✅ | ✅ | Weight-level, unaffected |
+
+**Implication for benchmarking:** The only optimization that applies to fullres but not
+progressive is `torch.compile`.  Group D tests this directly.
+
+---
+
+## Quality Benchmark — Color Grading Hypothesis
+
+**Hypothesis:** Progressive resolution growing may produce better cinematic color
+fidelity than fullres because the low-resolution stage(s) lock in the global color
+palette and mood before fine detail is added.  A prompt like "golden hour" or
+"neon-lit Tokyo" will imprint its color style at 64×64 latent resolution, and
+subsequent upsampled stages refine texture within that established palette.
+
+### Prompts (10 total, color/cinematic focus)
+See `scratch/test_quality_benchmark.sh` for the full list.  Themes covered:
+- Golden hour / warm amber tones
+- Twilight rose-gold portraits
+- Neon cyberpunk blues / magentas
+- Tuscan ochre sunsets
+- Arctic blue-hour
+- Jazz-club amber tungsten
+- Pastel cherry blossom
+- Desert dawn orange
+- Underwater teal
+- Autumn crimson / cadmium orange
+
+### Running
+```bash
+bash scratch/test_quality_benchmark.sh             # 50 steps, seed 42
+bash scratch/test_quality_benchmark.sh --steps 20  # faster draft pass
+```
+
+### Evaluation
+- Visual comparison of `prompt_NN_fullres.png` vs `prompt_NN_prog.png`
+- Progressive wins if: more saturated / coherent color, stronger mood atmosphere
+- Fullres wins if: sharper fine detail, less chromatic fringing
 
 ---
 
 ## Result History
 
-| Date | Steps | A1 (s) | A2 speedup | A3 speedup | A4 speedup | B1 speedup | Notes |
+| Date | Steps | A1 (s) | A2 speedup | A3 speedup | A4 speedup | D1 speedup | Notes |
 |---|---|---|---|---|---|---|---|
 | 2026-05-30 | 20 | 24.73 | 1.28× | 1.37× | 1.26× | — | with DIT offload (biased) |
 | 2026-05-31 | 50 | 57.82 | 1.35× | 1.56× | 1.41× | — | with DIT offload (biased) |
-| 2026-05-31 | 50 | TBD | TBD | TBD | TBD | TBD | GPU-resident (this run) |
+| 2026-05-31 | 50 | TBD | TBD | TBD | TBD | TBD | GPU-resident, +torch.compile group |
 
 ---
 
@@ -151,10 +193,12 @@ GPU implementation (torch.fft Makhoul) vs scipy:
 ## Files
 ```
 scratch/
-  test_progressive_benchmark.sh   # Main benchmark script (this guide's companion)
+  test_progressive_benchmark.sh   # Main benchmark script (Groups A + D)
+  test_quality_benchmark.sh       # Color/cinematic quality experiment (10 prompts)
   test_progressive_gen.sh         # Legacy sweep script (varies δ/levels)
   benchmark_guide.md              # This file
-  results/bench_YYYYMMDD_HHMMSS/  # Per-run outputs
+  results/bench_YYYYMMDD_HHMMSS/  # Per-run outputs (speed benchmark)
+  results/quality_YYYYMMDD_HHMMSS/ # Per-run outputs (quality benchmark)
     *.png                         # Generated images
     *.log                         # Full sglang output per run
     timing.tsv                    # run_id / total_s / denoise_s / avg_step_s

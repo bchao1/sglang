@@ -11,12 +11,14 @@
 #     - TeaCache + progressive compatibility
 #
 # GROUPS
-#   A  Baseline: fullres vs progressive, NO offload, NO optimizations
-#      → shows real compute speedup, comparable to paper numbers
-#   B  Fullres with TeaCache (GPU-resident)
-#      → best-effort fullres throughput with all available opts
-#   C  Progressive + TeaCache compatibility test (GPU-resident)
-#      → does progressive generation break with TeaCache enabled?
+#   A  Baseline: fullres vs progressive, GPU-resident, no opts
+#      → shows raw compute speedup vs paper numbers
+#   D  Fullres + torch.compile vs progressive (no compile, incompatible)
+#      → head-to-head: best-effort fullres vs progressive without torch.compile
+#
+# NOTE: TeaCache (Groups B/C) omitted — FLUX.1 does not implement TeaCache
+# (FluxTransformer2DModel.forward() does not call TeaCacheMixin hooks).
+# torch.compile is also incompatible with progressive (fixed seq-len kernel).
 #
 # USAGE
 #   bash scratch/test_progressive_benchmark.sh [--steps N] [--seed N] [--group A|B|C|all]
@@ -45,7 +47,7 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         --steps)  STEPS="$2"; shift 2 ;;
         --seed)   SEED="$2";  shift 2 ;;
-        --group)  GROUP="$2"; shift 2 ;;
+        --group)  GROUP="$2"; shift 2 ;;  # A | D | all
         *) echo "Unknown arg: $1"; exit 1 ;;
     esac
 done
@@ -146,45 +148,34 @@ if [[ "$GROUP" == "all" || "$GROUP" == "A" ]]; then
 fi
 
 # =============================================================================
-# GROUP B — Fullres + TeaCache (GPU-resident)
+# GROUP D — Fullres + torch.compile (GPU-resident, all default opts)
 # =============================================================================
-if [[ "$GROUP" == "all" || "$GROUP" == "B" ]]; then
+# NOTE: TeaCache is NOT implemented for FLUX.1 — FluxTransformer2DModel.forward()
+# does not call the TeaCacheMixin hooks, so --enable-teacache is a silent no-op.
+# Groups B and C (TeaCache tests) are omitted until FLUX TeaCache is added.
+# torch.compile is incompatible with progressive (fixed seq len in compiled kernel),
+# so it is only tested here for fullres.
+if [[ "$GROUP" == "all" || "$GROUP" == "D" ]]; then
     echo ""
     echo "╔══════════════════════════════════════════════════════════════╗"
-    echo "║  GROUP B  Fullres + TeaCache                                ║"
+    echo "║  GROUP D  Fullres + torch.compile (all default opts)        ║"
     echo "╚══════════════════════════════════════════════════════════════╝"
 
-    # B1: fullres + TeaCache (default threshold, ~1.5x expected)
-    # TeaCache skips redundant transformer steps using temporal similarity.
-    # Compatible with progressive? TeaCache state is per-step; if we reset it
-    # at stage transitions it should work. Tested in Group C.
-    run_gen "B1_fullres_teacache" \
-        --enable-teacache
-fi
+    # D1: fullres + torch.compile
+    # torch.compile fuses and optimizes the transformer forward graph.
+    # Incompatible with progressive (sequence length changes between stages),
+    # so this is the best-effort fullres baseline for head-to-head comparison.
+    run_gen "D1_fullres_compile" \
+        --enable-torch-compile
 
-# =============================================================================
-# GROUP C — Progressive + TeaCache compatibility
-# =============================================================================
-if [[ "$GROUP" == "all" || "$GROUP" == "C" ]]; then
-    echo ""
-    echo "╔══════════════════════════════════════════════════════════════╗"
-    echo "║  GROUP C  Progressive + TeaCache (compatibility test)       ║"
-    echo "╚══════════════════════════════════════════════════════════════╝"
-
-    # C1: progressive L1 + TeaCache
-    # Expected: either works (if TeaCache resets at transition) or produces
-    # wrong output / error (sequence-length mismatch in cached states).
-    run_gen "C1_prog_L1_d0.01_teacache" \
+    # D2: progressive L1 δ=0.05 (no compile — incompatible) vs D1 above
+    # This is the apples-to-apples comparison: fullres+compile vs prog+no-compile.
+    # If progressive still wins despite compile, the quadratic attention saving
+    # outweighs the compile benefit.
+    run_gen "D2_prog_L1_d0.05_nocompile" \
         --progressive-mode dct_rewind \
         --progressive-levels 1 \
-        --progressive-delta 0.01 \
-        --enable-teacache
-
-    run_gen "C2_prog_L1_d0.05_teacache" \
-        --progressive-mode dct_rewind \
-        --progressive-levels 1 \
-        --progressive-delta 0.05 \
-        --enable-teacache
+        --progressive-delta 0.05
 fi
 
 # =============================================================================

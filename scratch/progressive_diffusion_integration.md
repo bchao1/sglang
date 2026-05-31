@@ -162,13 +162,16 @@ python -m pytest python/sglang/multimodal_gen/test/unit/test_progressive_upsampl
 |---|---|---|
 | Layerwise CPU offload | ✅ Safe | Component-level, unaffected |
 | LoRA | ✅ Safe | Weight-level |
-| TeaCache | ✅ Safe | Scheduler-side cache, unaffected |
-| CFG parallel | ✅ Safe | FLUX uses single-branch guidance |
+| CFG parallel | ✅ Safe | FLUX uses single-branch guidance distillation |
+| **TeaCache** | ❌ Not impl. | `FluxTransformer2DModel.forward()` does not call `TeaCacheMixin` hooks. `--enable-teacache` is a silent no-op for FLUX. No-op means also safe (produces no errors), but provides zero speedup. |
 | **Cache-Dit** | ❌ Broken | Step cache indexed by step count; stage-1 1024-token cache incompatible with stage-2. Must reinit at each resolution transition. |
-| **STA** (Sliding Tile Attn) | ❌ Broken | `prepare_sta_param` called once for initial (low-res) shape. Stage-2 gets wrong tile config. |
+| **STA** (Sliding Tile Attn) | ❌ Not impl. | No `--enable-sta` flag exists for FLUX in the current codebase. |
 | **torch.compile** | ❌ Broken | Compiled kernel has fixed sequence length; 1024→4096 triggers recompile or error. |
 
-All three broken ones are opt-in and **disabled by default** — current benchmarks are safe.
+All non-safe options are opt-in and **disabled by default** — current benchmarks are safe.
+
+**Only optimization that affects the fullres vs progressive comparison:**
+`torch.compile` works for fullres but not progressive. Group D benchmarks this directly.
 
 ## DCT Precision Fix (Bug 5)
 Noise was generated in `bfloat16` (7 mantissa bits); DCT coefficients were also quantized to bfloat16 before IDCT, giving mean abs error ~0.8 vs output range ±4. Fixed by keeping all spectral computation in float32, casting only the final output. GPU result now matches scipy to relative error 1.7e-7.
@@ -185,6 +188,25 @@ Both d=0.01, 50 steps, L1. Both use same sigma schedule (FLUX dynamic shift, tra
 
 The attention computation scales exactly quadratically (16.3× ratio for 4096/1024 tokens ✓). However the constant ~0.41s/step CPU-to-GPU model load in SGLang's default `dit_cpu_offload=true` mode is the same regardless of sequence length, diluting the speedup. The paper measures pure GPU compute (model resident in VRAM), recovering the quadratic attention benefit and reaching ~1.5–1.7×. Running SGLang with `--dit-cpu-offload false` (requires ≥40GB VRAM) would close most of the gap.
 
+## Color Grading Hypothesis
+
+**Hypothesis:** Progressive generation may reproduce cinematic color descriptions
+(golden hour, neon, warm amber, blue-hour) more faithfully than fullres generation
+because the low-resolution stages commit to the global color palette and lighting
+mood before fine detail is added.
+
+At 64×64 latent (stage 1), the network has no room to allocate capacity to local
+texture — it learns global structure and color.  Descriptions like "golden hour" or
+"deep teal shadows" have an outsized influence on the low-res stage, producing a
+locked-in color vibe that subsequent high-res stages cannot easily override.  Fullres
+generation distributes attention across both global color and local detail from step 1,
+potentially diluting the color signal.
+
+**Benchmark:** `scratch/test_quality_benchmark.sh` — 10 prompts, fullres vs progressive
+(dct_rewind L1 δ=0.05), same seed, 50 steps.
+
+---
+
 ## Change Log
 - 2026-05-29: Initial implementation
 - 2026-05-30: Bugs 1–3 fixed; first successful end-to-end run (1.26–1.38× at 20 steps)
@@ -192,3 +214,7 @@ The attention computation scales exactly quadratically (16.3× ratio for 4096/10
               feature branch `bchao1/spectral-progressive-flux` created, main restored to clean upstream;
               Bug 5 fixed (bfloat16 noise → float32, error 0.8→1.7e-7 vs scipy); speedup gap vs paper
               analysed (0.41s/step CPU offload overhead is the bottleneck)
+- 2026-05-31: Opt compatibility audit: TeaCache confirmed no-op for FLUX (forward() skips
+              TeaCacheMixin hooks), STA not available in codebase; torch.compile is only
+              fullres-only opt; benchmark updated to Group D (fullres+compile vs prog no-compile);
+              quality benchmark added (10 color/cinematic prompts, color grading hypothesis)
