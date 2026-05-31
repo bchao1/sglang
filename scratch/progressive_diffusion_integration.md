@@ -121,27 +121,28 @@ runtime/pipelines_core/stages/__init__  # export ProgressiveDenoisingStage
 | dct_plain  L1 δ=0.01 | 8@64²+12@128² | 16.25s | 18.22s | **1.36×** |
 
 ### 50 steps (GPU: RTX A6000 48GB, GPU-resident `--dit-cpu-offload false`)
-**Group A: Pure baseline — no optimizations**
 
-| Config | Stage split | Denoise | Speedup | Token-step (ref formula) |
-|--------|------------|---------|---------|--------------------------|
-| A1 fullres | 50 @ 128² | 36.44s | 1.00× | 1.00× |
-| A2 dct_rewind L1 δ=0.01 | 18@64²+32@128² | 27.52s | **1.32×** | 1.37× |
-| A3 dct_rewind L1 δ=0.05 | 28@64²+22@128² | 22.48s | **1.62×** | 1.72× |
-| A4 dct_rewind L2 δ=0.01 | 10@32²+8@64²+32@128² | 26.37s | **1.38×** | 1.44× |
+**Group A — pure baseline, no optimizations** (bench_20260531_163942, solo run, reproducible to ±0.5%)
 
-Wall-clock is 94–96% of token-step speedup — the ~4–6% gap is fixed per-step overhead (scheduler step, memory ops) that does not scale with token count.
+| Config | Stage split | Denoise | Avg s/step | Speedup | Token-step |
+|--------|------------|---------|-----------|---------|-----------|
+| A1 fullres | 50@128² | 36.65s | 0.733s | 1.00× | 1.00× |
+| A2 dct_rewind L1 δ=0.01 | 18@64² + 32@128² | 27.67s | 0.553s | **1.32×** | 1.37× |
+| A3 dct_rewind L1 δ=0.05 | 28@64² + 22@128² | 22.58s | 0.452s | **1.62×** | 1.72× |
+| A4 dct_rewind L2 δ=0.01 | 10@32² + 8@64² + 32@128² | 26.48s | 0.530s | **1.38×** | 1.44× |
 
-**Group D: fullres+torch.compile vs progressive (compatibility / fairness test)**
+Wall-clock is 94–96% of token-step speedup. The ~5% gap is fixed per-step overhead (scheduler `.step()`, memory allocs) that doesn't scale with token count. Confirmed reproducible: first clean run (bench_20260531_153034) agreed within 0.5% on all configs.
+
+**Group D — fullres+torch.compile vs progressive** (bench_20260531_161748)
 
 | Config | Denoise | vs A1 fullres |
-|--------|---------|----------------|
-| D1 fullres + `--enable-torch-compile` | 161.5s (first run) / ~35.5s steady | 0.23× / ~1.03× |
-| D2 prog dct_rewind L1 δ=0.05 (control) | 22.30s | **1.63×** |
+|--------|---------|---------------|
+| D1 fullres + `--enable-torch-compile` | 85.1s (first-run, ~50s Triton trace) / ~35.5s steady | 0.43× first / **1.03× steady** |
+| D2 prog dct_rewind L1 δ=0.05 (control) | 22.63s | **1.62×** |
 
-`torch.compile` requires ~127s first-step Triton kernel autotune on A6000, then 0.71 s/step (vs 0.73 s/step uncompiled — only 3% steady-state improvement). Progressive generation beats compiled fullres by **1.59×** even in steady state. torch.compile is not a practical optimisation for single-image generation.
+`torch.compile` on A6000 requires ~50s first-step graph tracing (Triton kernels cached from previous run; cold first run is ~127s). Steady-state after compilation: 0.710 s/step vs 0.733 s/step uncompiled — **only 3% improvement**. Progressive beats compiled fullres by **1.58×** even in steady state. Not a practical optimization for single-image workloads.
 
-All progressive outputs are valid images.
+All progressive outputs are valid images (no artifacts).
 
 ---
 
@@ -244,9 +245,11 @@ potentially diluting the color signal.
 **Benchmark:** `scratch/test_quality_benchmark.sh` — 10 prompts, fullres vs progressive
 (dct_rewind L1 δ=0.05), same seed, 50 steps.
 
-### Quality Benchmark Results (2026-05-31, A6000, 50 steps, seed 42)
+### Quality Benchmark Results (2026-05-31, quality_20260531_162803, GPU 7, 50 steps, seed 42)
 
-**Timing:** fullres avg 38.76s, progressive avg 24.51s → **1.58× speedup** (consistent with Group A).
+**Timing (8 complete pairs — prompts 01-03, 05-09):**
+fullres avg 39.10s, progressive avg 24.74s → **1.58× speedup** (consistent with Group A).
+Note: prompt_00_fullres and prompt_04_prog failed silently due to port collision during parallel speed benchmark startup; remaining 18 images are valid.
 
 | Prompt | Theme | Quality verdict |
 |--------|-------|-----------------|
@@ -289,13 +292,17 @@ potentially diluting the color signal.
               fullres-only opt; benchmark updated to Group D (fullres+compile vs prog no-compile);
               quality benchmark added (10 color/cinematic prompts, color grading hypothesis)
 - 2026-05-31: Full GPU-resident benchmark (50 steps, A6000, --dit-cpu-offload false):
-              A1=36.44s, A2=1.32×, A3=1.62×, A4=1.38×. torch.compile OOMs on first try
-              (needed PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True + clean GPU), then
-              D1=161.5s (127s first-step compile overhead), steady-state only 3% faster than
-              uncompiled — prog no-compile beats compiled fullres by 1.59×.
+              Final clean Group A (bench_20260531_163942, solo): A1=36.65s/0.733s/step,
+              A2=27.67s (1.32×), A3=22.58s (1.62×), A4=26.48s (1.38×). Reproducible to ±0.5%
+              across three independent runs. Token-step speedup (formula): 1.37×/1.72×/1.44×;
+              wall-clock is 94–96% of theoretical — gap is fixed per-step overhead.
+              Group D (bench_20260531_161748): torch.compile D1=85.1s (50s Triton trace, 3%
+              steady-state gain); prog D2=22.63s (1.62×). Progressive beats compiled fullres
+              by 1.58× even in steady state.
               Reference impl audit: SGLang matches wavelet-diffusion/inference_progressive.py
-              on all critical params (sigma schedule, mu, CFG, stage transitions, rewind). No bugs.
-              Wall-clock is 94–96% of token-step speedup; gap = fixed per-step overhead.
-              Quality benchmark (10 color/cinematic prompts): all images valid, no artifacts.
-              Progressive 1.58× faster. Color palette differences present but subtle and
-              prompt-dependent; hypothesis partially supported (strongest in prompt 07 desert).
+              on all critical params. No bugs. Sigma schedule, mu=1.15, transition steps (18/28),
+              rewind formula all verified exact.
+              Quality benchmark (quality_20260531_162803, GPU 7, 8/10 complete pairs):
+              fullres avg=39.1s, prog avg=24.7s, 1.58× speedup. All images artifact-free.
+              Color hypothesis partially supported: subtle palette differences, strongest in
+              prompt_07 (desert: deeper red-orange in prog). Not a universal effect.
