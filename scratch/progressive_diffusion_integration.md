@@ -156,8 +156,39 @@ python -m pytest python/sglang/multimodal_gen/test/unit/test_progressive_upsampl
 
 ---
 
+## Optimization Compatibility
+
+| Optimization | Progressive | Notes |
+|---|---|---|
+| Layerwise CPU offload | ✅ Safe | Component-level, unaffected |
+| LoRA | ✅ Safe | Weight-level |
+| TeaCache | ✅ Safe | Scheduler-side cache, unaffected |
+| CFG parallel | ✅ Safe | FLUX uses single-branch guidance |
+| **Cache-Dit** | ❌ Broken | Step cache indexed by step count; stage-1 1024-token cache incompatible with stage-2. Must reinit at each resolution transition. |
+| **STA** (Sliding Tile Attn) | ❌ Broken | `prepare_sta_param` called once for initial (low-res) shape. Stage-2 gets wrong tile config. |
+| **torch.compile** | ❌ Broken | Compiled kernel has fixed sequence length; 1024→4096 triggers recompile or error. |
+
+All three broken ones are opt-in and **disabled by default** — current benchmarks are safe.
+
+## DCT Precision Fix (Bug 5)
+Noise was generated in `bfloat16` (7 mantissa bits); DCT coefficients were also quantized to bfloat16 before IDCT, giving mean abs error ~0.8 vs output range ±4. Fixed by keeping all spectral computation in float32, casting only the final output. GPU result now matches scipy to relative error 1.7e-7.
+
+## Speedup Gap: Paper 1.66× vs SGLang 1.35×
+
+Both d=0.01, 50 steps, L1. Both use same sigma schedule (FLUX dynamic shift, transition at step 18).
+
+| Path | 1024-tok step | 4096-tok step | Speedup |
+|---|---|---|---|
+| SGLang (CPU offload) | 0.448s (0.411s load + 0.037s compute) | 1.014s | **1.35×** |
+| Pure compute (no offload) | 0.037s | 0.603s | **~1.51×** |
+| Token-step (linear model) | — | — | **1.37×** |
+
+The attention computation scales exactly quadratically (16.3× ratio for 4096/1024 tokens ✓). However the constant ~0.41s/step CPU-to-GPU model load in SGLang's default `dit_cpu_offload=true` mode is the same regardless of sequence length, diluting the speedup. The paper measures pure GPU compute (model resident in VRAM), recovering the quadratic attention benefit and reaching ~1.5–1.7×. Running SGLang with `--dit-cpu-offload false` (requires ≥40GB VRAM) would close most of the gap.
+
 ## Change Log
 - 2026-05-29: Initial implementation
 - 2026-05-30: Bugs 1–3 fixed; first successful end-to-end run (1.26–1.38× at 20 steps)
 - 2026-05-31: Bug 4 fixed (CFGBranch.kwargs freqs_cis); full 50-step benchmark (1.35–1.56×);
-              feature branch `bchao1/spectral-progressive-flux` created, main restored to clean upstream
+              feature branch `bchao1/spectral-progressive-flux` created, main restored to clean upstream;
+              Bug 5 fixed (bfloat16 noise → float32, error 0.8→1.7e-7 vs scipy); speedup gap vs paper
+              analysed (0.41s/step CPU offload overhead is the bottleneck)
