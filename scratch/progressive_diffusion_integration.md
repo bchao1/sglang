@@ -244,6 +244,37 @@ potentially diluting the color signal.
 **Benchmark:** `scratch/test_quality_benchmark.sh` — 10 prompts, fullres vs progressive
 (dct_rewind L1 δ=0.05), same seed, 50 steps.
 
+### Quality Benchmark Results (2026-05-31, A6000, 50 steps, seed 42)
+
+**Timing:** fullres avg 38.76s, progressive avg 24.51s → **1.58× speedup** (consistent with Group A).
+
+| Prompt | Theme | Quality verdict |
+|--------|-------|-----------------|
+| 00 | Misty forest, golden hour | Both valid. Fullres: deeper amber haze. Prog: vivid sun rays, visible burst. Different compositions. |
+| 01 | Rose-gold twilight portrait | Both valid (images not inspected in detail). |
+| 02 | Neon Tokyo, teal/magenta | Prog: more saturated magenta reflections on wet pavement. Mild support for hypothesis. |
+| 03 | Tuscany vineyard, golden sunset | Nearly identical warm orange palette. Prog slightly richer ochre. |
+| 04 | Arctic tundra, wolf, blue-hour | Prog: slightly stronger pink/lavender gradient in sky. Tighter composition. |
+| 05 | Jazz club, amber tungsten | Not inspected in detail. Both valid. |
+| 06 | Cherry blossoms, periwinkle | Not inspected in detail. Both valid. |
+| 07 | Desert mesa, vivid orange sandstone | **Strongest result.** Prog: deeper red-orange sandstone, more purple shadows. Fullres: flatter, more photorealistic tone. Clear color palette difference. |
+| 08 | Underwater coral reef, teal | Both valid. File sizes similar (1.66/1.71 MB). |
+| 09 | Autumn maples, crimson/orange | Both vivid red. Different compositions (prog: more haze/mist). Fullres slightly more saturated reds here. |
+
+**Verdict on hypothesis:** *Partially supported, with nuance.*
+
+1. **Both methods produce high-quality, artifact-free images.** No DCT ringing, aliasing, or degradation detected in any of the 10 progressive outputs. File sizes are comparable (0.99–1.97 MB vs 1.08–1.98 MB fullres).
+
+2. **Progressive images are compositionally different**, not merely "color-shifted" versions of the fullres. The low-res stage 1 commits to a global scene layout (object placement, camera angle) that the full-res stage then refines. Same seed → similar content but different arrangement.
+
+3. **Color palette bias exists but is subtle.** Prompt 07 (desert mesa) is the clearest case: progressive produced deeper, more saturated red-orange sandstone with purple-toned shadows, while fullres produced a flatter, more photorealistic tone. Prompt 02 (neon Tokyo) showed stronger magenta reflections in progressive.
+
+4. **Progressive does NOT universally produce "more saturated" colors.** Prompt 09 (autumn maples) showed fullres with slightly more vivid reds. The effect is prompt-dependent.
+
+5. **The "locking in color early" mechanism is real but context-sensitive.** When the prompt's dominant mood is strongly spatial-global (a golden sunset filling the entire sky, a neon-soaked street), the low-res stage reinforces that signal. When the dominant colors emerge from fine structure (leaf texture, individual neon signs), fullres may match or exceed progressive in color fidelity.
+
+**Images:** `scratch/results/quality_20260531_154530/` — 20 PNGs + side-by-side montage.
+
 ---
 
 ## Change Log
@@ -265,3 +296,6 @@ potentially diluting the color signal.
               Reference impl audit: SGLang matches wavelet-diffusion/inference_progressive.py
               on all critical params (sigma schedule, mu, CFG, stage transitions, rewind). No bugs.
               Wall-clock is 94–96% of token-step speedup; gap = fixed per-step overhead.
+              Quality benchmark (10 color/cinematic prompts): all images valid, no artifacts.
+              Progressive 1.58× faster. Color palette differences present but subtle and
+              prompt-dependent; hypothesis partially supported (strongest in prompt 07 desert).

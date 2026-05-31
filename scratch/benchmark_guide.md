@@ -176,7 +176,9 @@ bash scratch/test_quality_benchmark.sh --steps 20  # faster draft pass
 |---|---|---|---|---|---|---|---|
 | 2026-05-30 | 20 | 24.73 | 1.28× | 1.37× | 1.26× | — | with DIT offload (biased) |
 | 2026-05-31 | 50 | 57.82 | 1.35× | 1.56× | 1.41× | — | with DIT offload (biased) |
-| 2026-05-31 | 50 | TBD | TBD | TBD | TBD | TBD | GPU-resident, +torch.compile group |
+| 2026-05-31 | 50 | 36.44 | 1.32× | 1.62× | 1.38× | 0.22×† | GPU-resident A6000, no offload |
+
+†D1 torch.compile: 161.5s first-run (127s Triton autotune), ~35.5s steady-state (3% gain vs A1). Progressive beats compiled fullres by 1.59× even in steady state. Token-step speedup (formula): A2=1.37×, A3=1.72×, A4=1.44×. Wall-clock is 94–96% of theoretical.
 
 ---
 
