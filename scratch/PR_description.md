@@ -31,10 +31,17 @@ Labels show **denoising-loop time only** (model load and VAE decode are the same
 
 | Prompt | Denoise fullres | Denoise progressive | **Speedup** |
 |--------|----------------|---------------------|-------------|
-| 01 landscape | 36.0 s | 22.5 s | **1.62×** |
-| 02 architecture | 36.8 s | 22.5 s | **1.63×** |
-| 03–10 | ~37 s | ~23 s | **~1.6×** |
-| **Dedicated benchmark** | **36.65 s** | **22.58 s** | **1.62×** |
+| 01 landscape | 36.6 s | 22.6 s | **1.62×** |
+| 02 architecture | 36.8 s | 22.6 s | **1.63×** |
+| 03 portrait | 36.8 s | 22.6 s | **1.63×** |
+| 04 cityscape | 36.8 s | 22.6 s | **1.63×** |
+| 05 object | 36.8 s | 22.6 s | **1.63×** |
+| 06 wildlife | 36.8 s | 22.6 s | **1.63×** |
+| 07 interior | 36.7 s | 22.7 s | **1.62×** |
+| 08 seascape | 36.9 s | 22.6 s | **1.63×** |
+| 09 desert | 36.9 s | 22.6 s | **1.63×** |
+| 10 fantasy | 36.8 s | 22.6 s | **1.63×** |
+| **Average** | **36.8 s** | **22.6 s** | **1.63×** |
 
 Individual comparison strips (each 1030×576, committed in `docs_new/images/progressive/`):
 

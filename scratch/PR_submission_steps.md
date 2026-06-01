@@ -1,29 +1,63 @@
 # PR Submission Steps
 
-Branch: `bchao1/spectral-progressive-flux`
+Branch: `bchao1/spectral-progressive-flux`  
 Target:  `sgl-project/sglang` → `main`
 
 ---
 
-## Step 1 — Run pre-commit checks
+## Step 1 — Wait for image generation to finish
+
+The background run (`gen_pr_comparisons.py`, GPU 0) is regenerating all 10 comparison
+strips with **denoising-only** timing labels (~1.62× speedup shown on each image).
+
+Wait until **all 10 strips** are updated and the montage is regenerated:
 
 ```bash
-cd /home/brianchc/sglang
+# Check: all should show today's date at 12:xx
+ls -la docs_new/images/progressive/*_compare.png | awk '{print $6,$7,$NF}' | sed 's|.*/||'
 
-pip install pre-commit        # if not already installed
-pre-commit install
-pre-commit run --all-files    # fix any lint / formatting issues
-```
-
-If pre-commit modifies files, re-stage and amend:
-```bash
-git add -u
-git commit --amend --no-edit
+# Check: timing.json should have denoise_fullres / denoise_prog fields
+python3 -c "import json; d=json.load(open('scratch/results/pr_images/timing.json')); print('OK' if 'denoise_fullres' in d[0] else 'NOT READY')"
 ```
 
 ---
 
-## Step 2 — Run unit tests (CPU-only, no GPU needed)
+## Step 2 — Update the PR description timing table
+
+Once `timing.json` has denoising data, update the table in `scratch/PR_description.md`:
+
+```python
+python3 -c "
+import json
+d = json.load(open('scratch/results/pr_images/timing.json'))
+for r in d:
+    print(f\"| {r['id']:02d} {r['label']:<12} | {r['denoise_fullres']:.1f} s | {r['denoise_prog']:.1f} s | **{r['speedup_denoise']:.2f}x** |\")
+"
+```
+
+Replace the `| 03–10 | ~37 s | ~23 s | **~1.6×** |` placeholder row in `PR_description.md`
+with the actual per-prompt values printed above.
+
+---
+
+## Step 3 — Run pre-commit checks
+
+```bash
+cd /home/brianchc/sglang
+pip install pre-commit        # if not already installed
+pre-commit install
+pre-commit run --all-files
+```
+
+Pre-commit runs BEFORE the commit. If it modifies any files, just re-add them:
+```bash
+git add -u
+# Then proceed to step 4 (no amend needed yet — you haven't committed yet)
+```
+
+---
+
+## Step 4 — Run unit tests
 
 ```bash
 python -m unittest discover \
@@ -34,31 +68,18 @@ python -m unittest discover \
 python -m unittest discover \
   -s python/sglang/multimodal_gen/test/unit \
   -p "test_sampling_params.py" -v
-# Expected: 31 tests OK (includes 8 TestProgressiveSamplingParams tests)
+# Expected: 31 tests OK
 ```
 
 ---
 
-## Step 3 — Wait for v2 image generation to finish
-
-The current generation run (`gen_pr_comparisons.py`) is writing updated comparison
-strips with **denoising-only timing** labels to `docs_new/images/progressive/`.
-Watch for the `bej8h6e90` background task to complete, then verify:
+## Step 5 — Stage all changes and commit
 
 ```bash
-ls -lt docs_new/images/progressive/*_compare.png  # all should have today's timestamp
-cat scratch/results/pr_images/timing.json         # should have denoise_fullres / denoise_prog fields
-```
-
----
-
-## Step 4 — Stage all changes and commit
-
-```bash
-# Stage updated images (re-stage; some were modified by v2 run):
+# Stage updated images (re-stage everything; v2 run modified strips 01-10 + montage):
 git add docs_new/images/progressive/
 
-# Stage all code changes (tests, cleanup, benchmark, .gitignore):
+# Stage all code changes:
 git add \
   .gitignore \
   python/sglang/multimodal_gen/benchmarks/bench_offline_throughput.py \
@@ -71,46 +92,57 @@ git add \
   python/sglang/multimodal_gen/test/unit/test_progressive_upsample.py \
   python/sglang/multimodal_gen/test/unit/test_sampling_params.py
 
-# Verify: scratch/ must NOT appear in staged files
-git status --short | grep scratch   # expect: no output (scratch/ is gitignored)
-git status --short | grep "\.claude" # expect: no output (.claude/ is gitignored)
+# Sanity check: scratch/ and .claude/ must NOT appear
+git status --short | grep -E "scratch|\.claude"  # expect: no output
 
-# Commit everything
-git commit -m "feat(diffusion): progressive resolution growing for FLUX.1 via GPU DCT upsampling"
+# Commit
+git commit -m "test(diffusion): add unit tests, benchmark flags, and comparison images for progressive generation"
 ```
+
+> **Note:** The branch already has 3 earlier commits from the initial implementation. This becomes the 4th commit. GitHub squashes on merge, so the PR history is fine as-is.
+
+If pre-commit hook fails on commit, fix the issue and run `git commit` again (do NOT use `--no-verify` or `--amend`).
 
 ---
 
-## Step 5 — Push the branch
+## Step 6 — Push to your fork
 
 ```bash
 git push origin bchao1/spectral-progressive-flux
 ```
 
+`origin` = `https://github.com/bchao1/sglang.git` (your fork) ✓
+
 ---
 
-## Step 6 — Open the Pull Request on GitHub
+## Step 7 — Open the Pull Request
 
-1. Go to: https://github.com/sgl-project/sglang/compare/main...bchao1:sglang:bchao1/spectral-progressive-flux
+1. Go to your fork: **https://github.com/bchao1/sglang**
+   GitHub will show a yellow banner: **"bchao1/spectral-progressive-flux had recent pushes — Compare & pull request"** — click that button.
 
-2. Click **"Create pull request"**
+   Or go directly to:
+   ```
+   https://github.com/sgl-project/sglang/compare/main...bchao1:bchao1/spectral-progressive-flux
+   ```
+
+2. **Base**: `sgl-project/sglang:main`  
+   **Compare**: `bchao1:bchao1/spectral-progressive-flux`
 
 3. **Title** (copy exactly):
    ```
    [Diffusion] Progressive resolution growing for FLUX.1 via GPU DCT upsampling
    ```
 
-4. **Body**: paste the contents of `scratch/PR_description.md`
-   - Images use raw GitHub URLs that become active once the branch is pushed.
-   - No drag-and-drop needed — images are committed to the repo.
+4. **Body**: paste `scratch/PR_description.md`
+   - All 10 comparison images and the montage use raw GitHub URLs — they render automatically (no drag-and-drop needed).
 
 5. **Labels** (if you have permission): `diffusion`, `enhancement`, `performance`
 
 ---
 
-## Step 7 — Trigger CI
+## Step 8 — Trigger CI
 
-Once the PR is open, comment:
+Comment on the PR:
 ```
 /tag-run-ci-label
 ```
@@ -122,38 +154,40 @@ If tests fail:
 
 ---
 
-## Step 8 — Respond to review
+## Step 9 — Respond to review
 
-Key points:
+Key talking points:
 
-- **Backward compat**: `progressive_mode="fullres"` (default) — identical to original behavior for all existing requests. Zero changes to non-FLUX pipelines.
-- **New files only**: All progressive code is in new files under `progressive_resolution/`. Only three existing files are modified: `flux.py` (1 method swap), `stages/__init__.py` (+1 export), `sampling_params.py` (+3 fields + CLI args).
-- **torch.compile incompatibility**: Known, documented. Only affects opt-in flag that is off by default.
-- **Sequence parallelism guard**: `if get_sp_world_size() > 1: raise RuntimeError(...)` prevents silent wrong behavior with SP.
+| Question | Answer |
+|----------|--------|
+| Backward compat? | `progressive_mode="fullres"` default = identical to existing behavior. Zero change for non-FLUX pipelines. |
+| Why only FLUX? | `_unpack_latent`/`_repack_latent`/`_on_resolution_change` hooks make it easy to add other models later. |
+| torch.compile incompatible? | Yes, documented in PR. Only affects an opt-in flag that's off by default. |
+| Sequence parallelism? | Guarded with `RuntimeError` — fails loud, not silently. |
+| Image quality? | No artifacts. All 10 prompts produce artifact-free output; images in PR show this. |
 
 ---
 
-## Files changed (summary)
+## Files changed
 
 | File | Change |
 |------|--------|
 | `.gitignore` | Add `scratch/`, `.claude/`, `!docs_new/images/progressive/*.png` |
-| `sampling_params.py` | +3 fields (`progressive_mode/levels/delta`, all `batch_sig_exclude=True`) + CLI args |
-| `flux.py` | Replace `add_standard_denoising_stage()` → `_add_flux_denoising_stage()` |
-| `flux_progressive.py` | **New**: FLUX-specific progressive stage (pack/unpack + freqs_cis update) |
-| `stages/__init__.py` | Export `ProgressiveDenoisingStage` |
-| `progressive_resolution/` | **New module** (5 files): spectral_ops, scheduler_utils, upsample, denoising, `__init__` |
-| `bench_offline_throughput.py` | +3 `--progressive-*` flags (backward compatible, default=fullres) |
-| `test_progressive_upsample.py` | **New**: 32 CPU-only unit tests (unittest.TestCase) |
-| `test_sampling_params.py` | +8 progressive field tests |
-| `test_progressive_flux.py` | **New**: manual E2E test (GPU required) |
-| `docs_new/images/progressive/` | 10 comparison strips + montage (raw GitHub URLs in PR body) |
+| `sampling_params.py` | +3 fields (`progressive_mode/levels/delta`, `batch_sig_exclude=True`) + CLI args |
+| `flux.py` | `add_standard_denoising_stage()` → `_add_flux_denoising_stage()` (1 line swap) |
+| `flux_progressive.py` | **New**: FLUX-specific progressive stage |
+| `stages/__init__.py` | +1 export: `ProgressiveDenoisingStage` |
+| `progressive_resolution/` | **New module** (5 files) |
+| `bench_offline_throughput.py` | +3 `--progressive-*` flags |
+| `test_progressive_upsample.py` | **New**: 32 CPU-only unit tests |
+| `test_sampling_params.py` | +8 tests for progressive fields |
+| `test_progressive_flux.py` | **New**: manual E2E test |
+| `docs_new/images/progressive/` | 10 comparison strips + montage |
 
----
+## Compatibility verified
 
-## Compatibility notes
-
-- Branch diverges from `main` at `a5e6a8887` — no upstream changes to any of our files since then.
-- `sampling_params.py` fields have `batch_sig_exclude=True` — different requests can mix progressive/fullres in the same server without batching conflicts.
-- `stages/__init__.py` addition is alphabetically ordered (`progressive_resolution` after `ltx_2_denoising`).
-- `flux.py` import order follows the pattern in `qwen_image.py` (`disaggregation` < `pipelines` < `pipelines_core`).
+- No upstream changes to our files since branch point (`a5e6a8887`)
+- `sampling_params.py`: `batch_sig_exclude=True` — requests with different modes batch correctly
+- `stages/__init__.py`: alphabetically ordered (`progressive_resolution` after `ltx_2_denoising`)
+- `flux.py`: import order matches `qwen_image.py` pattern
+- 32 unit tests + 8 sampling_params tests all pass
