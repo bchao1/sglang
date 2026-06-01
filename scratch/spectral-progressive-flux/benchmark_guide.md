@@ -40,7 +40,7 @@ bash scratch/test_progressive_gen.sh --steps 50
 | DIT offload | `false` — transformer GPU-resident for all runs |
 | Text/VAE offload | layerwise (auto, small overhead, not measured) |
 
-**Why disable DIT CPU offload?**  
+**Why disable DIT CPU offload?**
 With offload enabled, every step pays ~0.41 s to PCIe-transfer the 22 GB
 transformer regardless of sequence length.  This constant overhead dilutes the
 quadratic attention savings that make progressive generation fast, depressing

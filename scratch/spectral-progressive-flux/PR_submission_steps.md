@@ -1,6 +1,6 @@
 # PR Submission Steps
 
-Branch: `bchao1/spectral-progressive-flux`  
+Branch: `bchao1/spectral-progressive-flux`
 Target:  `sgl-project/sglang` → `main`
 
 ---
@@ -125,7 +125,7 @@ git push origin bchao1/spectral-progressive-flux
    https://github.com/sgl-project/sglang/compare/main...bchao1:bchao1/spectral-progressive-flux
    ```
 
-2. **Base**: `sgl-project/sglang:main`  
+2. **Base**: `sgl-project/sglang:main`
    **Compare**: `bchao1:bchao1/spectral-progressive-flux`
 
 3. **Title** (copy exactly):

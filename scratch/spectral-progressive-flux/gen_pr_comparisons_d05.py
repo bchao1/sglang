@@ -32,39 +32,83 @@ STEPS = 50
 SEED = 42
 HEIGHT = 1024
 WIDTH = 1024
-DELTA = 0.05
+DELTA = 0.5
 LEVELS = 1
 
-OUT_DIR = Path(__file__).parent / "results" / "pr_images"
-DOC_DIR = Path(__file__).parent.parent / "docs_new" / "images" / "progressive"
+OUT_DIR = Path(__file__).parent / "results" / "pr_images_d05"
+DOC_DIR = Path(__file__).parent.parent / "docs_new" / "images" / "progressive_d05"
 
 PROMPTS = [
-    ("landscape",    "Golden hour over misty mountain peaks, dramatic cinematic light, photorealistic"),
-    ("architecture", "Gothic cathedral interior with stained glass windows, volumetric light shafts, 8K"),
-    ("portrait",     "Close-up portrait of an elderly woman with weathered skin, natural outdoor light, film grain"),
-    ("cityscape",    "Hong Kong neon-lit street at night, rain reflections, teal and magenta, cinematic"),
-    ("object",       "Macro photograph of a vintage pocket watch on velvet, bokeh, studio lighting"),
-    ("wildlife",     "Snow leopard mid-leap in Himalayan blizzard, motion blur, National Geographic style"),
-    ("interior",     "Minimalist Japanese tea room, morning light, cherry blossoms through paper screen door"),
-    ("seascape",     "Aerial view of turquoise sea over coral reef, Maldives, drone shot, midday sun"),
-    ("desert",       "Arizona slot canyon, swirling sandstone walls, single beam of orange sunlight from above"),
-    ("fantasy",      "Ancient floating islands with waterfalls, lush forests, misty atmosphere, concept art"),
+    (
+        "landscape",
+        "Golden hour over misty mountain peaks, dramatic cinematic light, photorealistic",
+    ),
+    (
+        "architecture",
+        "Gothic cathedral interior with stained glass windows, volumetric light shafts, 8K",
+    ),
+    (
+        "portrait",
+        "Close-up portrait of an elderly woman with weathered skin, natural outdoor light, film grain",
+    ),
+    (
+        "cityscape",
+        "Hong Kong neon-lit street at night, rain reflections, teal and magenta, cinematic",
+    ),
+    (
+        "object",
+        "Macro photograph of a vintage pocket watch on velvet, bokeh, studio lighting",
+    ),
+    (
+        "wildlife",
+        "Snow leopard mid-leap in Himalayan blizzard, motion blur, National Geographic style",
+    ),
+    (
+        "interior",
+        "Minimalist Japanese tea room, morning light, cherry blossoms through paper screen door",
+    ),
+    (
+        "seascape",
+        "Aerial view of turquoise sea over coral reef, Maldives, drone shot, midday sun",
+    ),
+    (
+        "desert",
+        "Arizona slot canyon, swirling sandstone walls, single beam of orange sunlight from above",
+    ),
+    (
+        "fantasy",
+        "Ancient floating islands with waterfalls, lush forests, misty atmosphere, concept art",
+    ),
 ]
 
 BASE_FLAGS = [
-    "--model-path", FLUX_MODEL,
-    "--attention-backend", "torch_sdpa",
-    "--num-inference-steps", str(STEPS),
-    "--seed", str(SEED),
-    "--height", str(HEIGHT),
-    "--width", str(WIDTH),
-    "--dit-cpu-offload", "false",
+    "--model-path",
+    FLUX_MODEL,
+    "--attention-backend",
+    "torch_sdpa",
+    "--num-inference-steps",
+    str(STEPS),
+    "--seed",
+    str(SEED),
+    "--height",
+    str(HEIGHT),
+    "--width",
+    str(WIDTH),
+    "--dit-cpu-offload",
+    "false",
+    "--master-port",
+    "30205",
+    "--scheduler-port",
+    "5835",
+    "--port",
+    "30200",
     "--save-output",
 ]
 
 # ---------------------------------------------------------------------------
 # Log-based denoising timing (same method as test_progressive_benchmark.sh)
 # ---------------------------------------------------------------------------
+
 
 def parse_denoise_time(log: str, mode: str) -> float | None:
     """Extract denoising-loop seconds from sglang generate log output.
@@ -87,8 +131,10 @@ def parse_denoise_time(log: str, mode: str) -> float | None:
 # Image helpers
 # ---------------------------------------------------------------------------
 
-def make_label_image(text: str, width: int, height: int = 36,
-                     bg=(20, 20, 20), fg=(255, 255, 255)) -> Image.Image:
+
+def make_label_image(
+    text: str, width: int, height: int = 36, bg=(20, 20, 20), fg=(255, 255, 255)
+) -> Image.Image:
     img = Image.new("RGB", (width, height), bg)
     draw = ImageDraw.Draw(img)
     for fpath in [
@@ -106,9 +152,15 @@ def make_label_image(text: str, width: int, height: int = 36,
     return img
 
 
-def make_side_by_side(img_fr: Image.Image, img_pr: Image.Image,
-                      label: str, denoise_fr: float, denoise_pr: float,
-                      out_path: Path, thumb_w: int = 512):
+def make_side_by_side(
+    img_fr: Image.Image,
+    img_pr: Image.Image,
+    label: str,
+    denoise_fr: float,
+    denoise_pr: float,
+    out_path: Path,
+    thumb_w: int = 512,
+):
     """Side-by-side strip labelled with DENOISING-ONLY time and speedup."""
     img_fr = img_fr.resize((thumb_w, thumb_w), Image.LANCZOS)
     img_pr = img_pr.resize((thumb_w, thumb_w), Image.LANCZOS)
@@ -116,14 +168,17 @@ def make_side_by_side(img_fr: Image.Image, img_pr: Image.Image,
 
     lbl_fr = make_label_image(f"Fullres  denoise={denoise_fr:.1f}s", thumb_w)
     lbl_pr = make_label_image(
-        f"Progressive δ=0.05  denoise={denoise_pr:.1f}s  ({speedup:.2f}×)",
-        thumb_w, bg=(0, 60, 30),
+        f"Progressive d={DELTA}  denoise={denoise_pr:.1f}s  ({speedup:.2f}×)",
+        thumb_w,
+        bg=(0, 60, 30),
     )
 
     strip_w = thumb_w * 2 + 6
     strip_h = thumb_w + lbl_fr.height + 28
     strip = Image.new("RGB", (strip_w, strip_h), (40, 40, 40))
-    title_bar = make_label_image(label.upper().replace("_", " "), strip_w, height=28, bg=(60, 60, 60))
+    title_bar = make_label_image(
+        label.upper().replace("_", " "), strip_w, height=28, bg=(60, 60, 60)
+    )
     strip.paste(title_bar, (0, 0))
     y_img = 28
     strip.paste(img_fr, (0, y_img))
@@ -140,7 +195,9 @@ def make_montage(strip_paths: list, out_path: Path, cols: int = 2):
         return
     sw, sh = strips[0].size
     rows = (len(strips) + cols - 1) // cols
-    montage = Image.new("RGB", (sw * cols + (cols - 1) * 4, sh * rows + (rows - 1) * 4), (20, 20, 20))
+    montage = Image.new(
+        "RGB", (sw * cols + (cols - 1) * 4, sh * rows + (rows - 1) * 4), (20, 20, 20)
+    )
     for i, strip in enumerate(strips):
         r, c = divmod(i, cols)
         montage.paste(strip, (c * (sw + 4), r * (sh + 4)))
@@ -152,7 +209,10 @@ def make_montage(strip_paths: list, out_path: Path, cols: int = 2):
 # Generation
 # ---------------------------------------------------------------------------
 
-def run_generate(prompt: str, outfile: Path, extra_flags: list = None) -> tuple[float, float | None, bool]:
+
+def run_generate(
+    prompt: str, outfile: Path, extra_flags: list = None
+) -> tuple[float, float | None, bool]:
     """Run sglang generate, return (wall_clock_s, denoise_s | None, success)."""
     cmd = (
         ["sglang", "generate"]
@@ -180,18 +240,24 @@ def run_generate(prompt: str, outfile: Path, extra_flags: list = None) -> tuple[
 # Main
 # ---------------------------------------------------------------------------
 
+
 def run():
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     DOC_DIR.mkdir(parents=True, exist_ok=True)
 
     prog_flags = [
-        "--progressive-mode", "dct_rewind",
-        "--progressive-levels", str(LEVELS),
-        "--progressive-delta", str(DELTA),
+        "--progressive-mode",
+        "dct_rewind",
+        "--progressive-levels",
+        str(LEVELS),
+        "--progressive-delta",
+        str(DELTA),
     ]
 
     print(f"Model:  {FLUX_MODEL}")
-    print(f"GPU:    CUDA_VISIBLE_DEVICES={os.environ.get('CUDA_VISIBLE_DEVICES', 'unset')}")
+    print(
+        f"GPU:    CUDA_VISIBLE_DEVICES={os.environ.get('CUDA_VISIBLE_DEVICES', 'unset')}"
+    )
     print(f"Steps:  {STEPS}  Seed: {SEED}  Resolution: {WIDTH}x{HEIGHT}")
     print(f"Mode:   dct_rewind  levels={LEVELS}  delta={DELTA}")
     print(f"Timing: DENOISING LOOP ONLY (model load not counted)")
@@ -224,26 +290,42 @@ def run():
 
         if den_fr and den_pr:
             speedup = den_fr / den_pr
-            print(f"  progressive: wall={wall_pr:.1f}s  denoise={den_pr:.2f}s  ({speedup:.2f}×)")
+            print(
+                f"  progressive: wall={wall_pr:.1f}s  denoise={den_pr:.2f}s  ({speedup:.2f}×)"
+            )
         else:
             speedup = wall_fr / wall_pr
-            print(f"  progressive: wall={wall_pr:.1f}s  (fallback wall-clock speedup={speedup:.2f}×)")
+            print(
+                f"  progressive: wall={wall_pr:.1f}s  (fallback wall-clock speedup={speedup:.2f}×)"
+            )
 
-        results.append({
-            "id": i, "label": label,
-            "wall_fullres": round(wall_fr, 2), "wall_prog": round(wall_pr, 2),
-            "denoise_fullres": round(den_fr, 2) if den_fr else None,
-            "denoise_prog": round(den_pr, 2) if den_pr else None,
-            "speedup_denoise": round(den_fr / den_pr, 3) if (den_fr and den_pr) else None,
-            "speedup_wall": round(wall_fr / wall_pr, 3),
-        })
+        results.append(
+            {
+                "id": i,
+                "label": label,
+                "wall_fullres": round(wall_fr, 2),
+                "wall_prog": round(wall_pr, 2),
+                "denoise_fullres": round(den_fr, 2) if den_fr else None,
+                "denoise_prog": round(den_pr, 2) if den_pr else None,
+                "speedup_denoise": (
+                    round(den_fr / den_pr, 3) if (den_fr and den_pr) else None
+                ),
+                "speedup_wall": round(wall_fr / wall_pr, 3),
+            }
+        )
 
         # Side-by-side labelled with denoising times
         d_fr_plot = den_fr if den_fr else wall_fr
         d_pr_plot = den_pr if den_pr else wall_pr
         strip_path = DOC_DIR / f"{i:02d}_{label}_compare.png"
-        make_side_by_side(Image.open(out_fr), Image.open(out_pr),
-                          label, d_fr_plot, d_pr_plot, strip_path)
+        make_side_by_side(
+            Image.open(out_fr),
+            Image.open(out_pr),
+            label,
+            d_fr_plot,
+            d_pr_plot,
+            strip_path,
+        )
         strip_paths.append(strip_path)
 
     if not results:
@@ -268,12 +350,16 @@ def run():
             totals_fr += r["denoise_fullres"]
             totals_pr += r["denoise_prog"]
             n += 1
-            print(f"{r['label']:<14}  {r['denoise_fullres']:>9.2f}s  {r['denoise_prog']:>9.2f}s  {r['speedup_denoise']:>7.2f}×")
+            print(
+                f"{r['label']:<14}  {r['denoise_fullres']:>9.2f}s  {r['denoise_prog']:>9.2f}s  {r['speedup_denoise']:>7.2f}×"
+            )
         else:
             print(f"{r['label']:<14}  (denoise timing not parsed)")
     if n > 0:
         print("-" * 75)
-        print(f"{'AVERAGE':<14}  {totals_fr/n:>9.2f}s  {totals_pr/n:>9.2f}s  {totals_fr/totals_pr:>7.2f}×")
+        print(
+            f"{'AVERAGE':<14}  {totals_fr/n:>9.2f}s  {totals_pr/n:>9.2f}s  {totals_fr/totals_pr:>7.2f}×"
+        )
     print("=" * 75)
 
     return results

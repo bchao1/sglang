@@ -13,7 +13,7 @@ SGLang was configured for Hopper (SM90) / CUDA 13.0 out of the box. These change
 pip install --force-reinstall torch==2.11.0+cu126 torchvision \
     --index-url https://download.pytorch.org/whl/cu126
 ```
-Was: `torch 2.11.0+cu130` (requires driver ≥ 570, this machine has 560).  
+Was: `torch 2.11.0+cu130` (requires driver ≥ 570, this machine has 560).
 Now: `torch 2.11.0+cu126` (matches driver 560.35.05 / CUDA 12.6).
 
 ### sgl-kernel — rebuilt from source
@@ -44,16 +44,16 @@ All changes are in `sgl-kernel/`. These are correctness fixes suitable for upstr
 
 ### 1. `sgl-kernel/CMakeLists.txt`
 
-**Fix: CUDA_VERSION not populated by modern CMake**  
-`cmake`'s new CUDA language support sets `CMAKE_CUDA_COMPILER_VERSION`, not the legacy `CUDA_VERSION` variable. All version guards were comparing against an empty string.  
+**Fix: CUDA_VERSION not populated by modern CMake**
+`cmake`'s new CUDA language support sets `CMAKE_CUDA_COMPILER_VERSION`, not the legacy `CUDA_VERSION` variable. All version guards were comparing against an empty string.
 ```cmake
 if (NOT CUDA_VERSION AND CMAKE_CUDA_COMPILER_VERSION)
     string(REGEX MATCH "^[0-9]+\\.[0-9]+" CUDA_VERSION "${CMAKE_CUDA_COMPILER_VERSION}")
 endif()
 ```
 
-**Fix: SM100 MXFP8 sources guarded behind CUDA ≥ 13.0**  
-`es_sm100_mxfp8_blockscaled*.cu` uses `__nv_fp8_e8m0` introduced in CUDA 13.0. Previously unconditional.  
+**Fix: SM100 MXFP8 sources guarded behind CUDA ≥ 13.0**
+`es_sm100_mxfp8_blockscaled*.cu` uses `__nv_fp8_e8m0` introduced in CUDA 13.0. Previously unconditional.
 ```cmake
 if ("${CUDA_VERSION}" VERSION_GREATER_EQUAL "13.0" OR SGL_KERNEL_ENABLE_SM100A)
     list(APPEND SOURCES "csrc/expert_specialization/es_sm100_mxfp8_blockscaled.cu" ...)
@@ -61,16 +61,16 @@ if ("${CUDA_VERSION}" VERSION_GREATER_EQUAL "13.0" OR SGL_KERNEL_ENABLE_SM100A)
 endif()
 ```
 
-**Fix: `SGL_KERNEL_ENABLE_FA3=OFF` user flag respected**  
-The cmake auto-enable for CUDA ≥ 12.4 used `set()` which overwrote the user's `-DSGL_KERNEL_ENABLE_FA3=OFF` cache entry.  
+**Fix: `SGL_KERNEL_ENABLE_FA3=OFF` user flag respected**
+The cmake auto-enable for CUDA ≥ 12.4 used `set()` which overwrote the user's `-DSGL_KERNEL_ENABLE_FA3=OFF` cache entry.
 ```cmake
 if (NOT DEFINED CACHE{SGL_KERNEL_ENABLE_FA3})
     set(SGL_KERNEL_ENABLE_FA3 ON)
 endif()
 ```
 
-**Add: `SGL_KERNEL_ENABLE_FLASHMLA` option**  
-FlashMLA is SM90-only. Added an opt-out for pre-SM90 builds.  
+**Add: `SGL_KERNEL_ENABLE_FLASHMLA` option**
+FlashMLA is SM90-only. Added an opt-out for pre-SM90 builds.
 ```cmake
 option(SGL_KERNEL_ENABLE_FLASHMLA "Build FlashMLA (SM90/SM100 only)" ON)
 if (SGL_KERNEL_ENABLE_FLASHMLA)
@@ -80,12 +80,12 @@ endif()
 
 ### 2. `sgl-kernel/include/sgl_kernel_ops.h` + `csrc/common_extension.cc`
 
-**Fix: SM100 MXFP8 op declarations/registrations gated on `SGL_KERNEL_HAVE_SM100_MXFP8`**  
+**Fix: SM100 MXFP8 op declarations/registrations gated on `SGL_KERNEL_HAVE_SM100_MXFP8`**
 Without the source files compiled in, the linker fails on undefined `es_sm100_mxfp8_blockscaled_grouped_*` symbols. Wrapped with `#if defined(SGL_KERNEL_HAVE_SM100_MXFP8)`.
 
 ### 3. `sgl-kernel/python/sgl_kernel/flash_attn.py`
 
-**Fix: `flash_ops` import made lazy (deferred to call time)**  
+**Fix: `flash_ops` import made lazy (deferred to call time)**
 The old code raised `ImportError` at module load time when `flash_ops.abi3.so` was absent:
 ```python
 # Before — crashes at import, blocks all sglang diffusion startup
@@ -112,7 +112,7 @@ FLUX.1-dev works fully. ✓
 ---
 
 ## Test script
-`scratch/test_diffusion_gen.sh` — FLUX.1-dev at 50 steps, TORCH_SDPA backend, GPU auto-selected via `select_gpu.sh`.  
+`scratch/test_diffusion_gen.sh` — FLUX.1-dev at 50 steps, TORCH_SDPA backend, GPU auto-selected via `select_gpu.sh`.
 Z-Image is commented out pending driver update.
 
 ---
