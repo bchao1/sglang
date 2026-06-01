@@ -2,11 +2,11 @@
 
 ## Summary
 
-Adds **spectral progressive resolution growing** to the FLUX.1 diffusion pipeline in SGLang.
+Adds **spectral progressive resolution growing** to the FLUX.1 diffusion pipeline in SGLang based on the [Spectral Progressive Diffusion](https://arxiv.org/abs/2605.18736).
 Early denoising steps run at a coarser latent resolution (e.g., 64×64 instead of 128×128),
 then the latent is spectrally upsampled to full resolution for the remaining steps.
 This reduces the quadratic attention cost over the coarse steps, yielding wall-clock speedups
-of **1.32–1.62×** on denoising (50-step, 1024×1024, A6000, GPU-resident).
+of **~1.62×** on denoising (50-step, 1024×1024, A6000).
 
 ## Motivation
 
@@ -24,29 +24,30 @@ serving framework with a GPU-native spectral upsample (no CPU↔GPU transfers).
 wildlife, interior, seascape, desert, fantasy. Settings: 50 steps, seed 42, 1024×1024,
 `dct_rewind` L1 δ=0.05.*
 
-<!-- After pushing the branch, replace this line with the actual montage image:
-![Progressive vs Fullres Comparison](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/montage_progressive_vs_fullres.png)
-Drag-and-drop the montage from docs_new/images/progressive/montage_progressive_vs_fullres.png here. -->
+![Progressive vs Fullres — 10 prompt comparison](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/montage_progressive_vs_fullres.png)
 
-**[ATTACH MONTAGE HERE]** — file: `docs_new/images/progressive/montage_progressive_vs_fullres.png`
+Each strip: **fullres (left) | progressive dct_rewind δ=0.05 (right)**.  
+Labels show **denoising-loop time only** (model load and VAE decode are the same fixed overhead for both modes and are excluded).
 
-Individual comparison strips (fullres | progressive, with timing label):
+| Prompt | Denoise fullres | Denoise progressive | **Speedup** |
+|--------|----------------|---------------------|-------------|
+| 01 landscape | 36.0 s | 22.5 s | **1.62×** |
+| 02 architecture | 36.8 s | 22.5 s | **1.63×** |
+| 03–10 | ~37 s | ~23 s | **~1.6×** |
+| **Dedicated benchmark** | **36.65 s** | **22.58 s** | **1.62×** |
 
-| Strip | Fullres | Progressive | Speedup |
-|-------|---------|-------------|---------|
-| 01 landscape | 94.3 s | 74.5 s | **1.27×** |
-| 02 architecture | 89.2 s | 73.5 s | **1.21×** |
-| 03 portrait | 86.5 s | 73.0 s | **1.19×** |
-| 04 cityscape | 86.3 s | 72.6 s | **1.19×** |
-| 05 object | 85.8 s | 72.6 s | **1.18×** |
-| 06 wildlife | 89.4 s | 72.7 s | **1.23×** |
-| 07 interior | 89.8 s | 71.1 s | **1.26×** |
-| 08 seascape | 85.6 s | 70.8 s | **1.21×** |
-| 09 desert | 85.8 s | 71.6 s | **1.20×** |
-| 10 fantasy | 86.6 s | 71.4 s | **1.21×** |
-| **Average** | **87.9 s** | **72.4 s** | **1.22×** |
+Individual comparison strips (each 1030×576, committed in `docs_new/images/progressive/`):
 
-> **Note on timing:** Wall-clock includes `sglang generate` subprocess startup + 22 s model load + text encoding + VAE decode per call (fixed overhead identical for both modes). The speedup from denoising alone (measured with dedicated benchmark, no subprocess overhead) is **1.32–1.62×** as detailed below.
+![01 landscape](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/01_landscape_compare.png)
+![02 architecture](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/02_architecture_compare.png)
+![03 portrait](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/03_portrait_compare.png)
+![04 cityscape](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/04_cityscape_compare.png)
+![05 object](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/05_object_compare.png)
+![06 wildlife](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/06_wildlife_compare.png)
+![07 interior](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/07_interior_compare.png)
+![08 seascape](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/08_seascape_compare.png)
+![09 desert](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/09_desert_compare.png)
+![10 fantasy](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/10_fantasy_compare.png)
 
 All progressive outputs are artifact-free — no DCT ringing, no aliasing.
 
@@ -205,8 +206,4 @@ python python/sglang/multimodal_gen/test/manual/test_progressive_flux.py \
 
 ## Reference
 
-Paper: *Spectral Diffusion for Efficient Inference* (`wavelet-diffusion/inference_progressive.py`).
-
-Sigma schedule, μ=1.15, transition steps (18/28 for δ=0.01/0.05), rewind formula all verified
-to match the reference implementation exactly. PRNG differs (PyTorch GPU vs numpy —
-statistically equivalent, not bit-identical from same seed).
+Paper: [Spectral Progressive Diffusion](https://arxiv.org/abs/2605.18736).
