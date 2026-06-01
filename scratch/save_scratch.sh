@@ -1,30 +1,31 @@
 #!/usr/bin/env bash
-# Auto-save scratch/ to dev/brian branch via a temporary git worktree.
-# Safe to call any time — uses worktree so the main checkout is never touched.
+# Save scratch/ to dev/brian via a temporary git worktree.
+# The main checkout is NEVER touched — no branch switch, no lost files.
+#
+# Usage: bash scratch/save_scratch.sh [commit-message-suffix]
+# Example: bash scratch/save_scratch.sh "spectral-progressive-flux: add bench script"
 set -euo pipefail
 
-REPO=/home/brianchc/sglang
+REPO=$(git -C "$(dirname "$0")" rev-parse --show-toplevel)
+SUFFIX=${1:-"update"}
 WDIR=$(mktemp -d /tmp/scratch-save-XXXXX)
 
 cleanup() { git -C "$REPO" worktree remove --force "$WDIR" 2>/dev/null; rm -rf "$WDIR" 2>/dev/null || true; }
 trap cleanup EXIT
 
-cd "$REPO"
+git -C "$REPO" worktree add "$WDIR" dev/brian -q
 
-# Add a worktree for dev/brian at a temp path
-git worktree add "$WDIR" dev/brian
-
-# Sync scratch/ into the worktree (--delete removes files gone from scratch/)
-rsync -a --delete --exclude='results/' scratch/ "$WDIR/scratch/"
+# Sync scratch/ into worktree; exclude results/ (local-only benchmark outputs)
+rsync -a --delete --exclude='**/results/' "$REPO/scratch/" "$WDIR/scratch/"
 
 cd "$WDIR"
 git add -f scratch/
 
 if git diff --cached --quiet; then
-    echo "[save_scratch] No changes in scratch/ — nothing to commit."
+    echo "[save_scratch] No changes — nothing to commit."
     exit 0
 fi
 
-git commit -m "wip: auto-save scratch from claude session"
+git commit -m "wip(scratch): $SUFFIX"
 git push origin dev/brian
-echo "[save_scratch] scratch/ saved and pushed to dev/brian."
+echo "[save_scratch] Pushed to dev/brian. Current branch unchanged."
