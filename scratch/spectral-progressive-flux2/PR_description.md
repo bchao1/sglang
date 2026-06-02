@@ -78,23 +78,23 @@ sglang generate --model-path black-forest-labs/FLUX.2-klein-4B \
 Settings: 30 steps, seed 42, 1024×1024, RTX A6000.
 Labels show denoising-loop time only. All three outputs are artifact-free.
 
-![3-way comparison: fullres | δ=0.05 | δ=0.10](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/montage_3way_small.png)
+![3-way comparison: fullres | δ=0.05 | δ=0.10](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux2/images/montage_3way_small.png)
 
 > **Quality note:** All three modes produce visually equivalent results. The low-resolution stage commits to global composition and color palette; detail is added at full resolution in the same manner as standard generation.
 
 <details>
 <summary>Per-prompt 3-way comparison strips (10 prompts)</summary>
 
-![01 misty forest](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/01_misty_forest_3way.png)
-![02 rose gold portrait](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/02_rose_gold_portrait_3way.png)
-![03 neon tokyo](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/03_neon_tokyo_3way.png)
-![04 tuscany vineyard](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/04_tuscany_vineyard_3way.png)
-![05 arctic tundra](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/05_arctic_tundra_3way.png)
-![06 jazz club](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/06_jazz_club_3way.png)
-![07 cherry blossoms](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/07_cherry_blossoms_3way.png)
-![08 desert mesa](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/08_desert_mesa_3way.png)
-![09 coral reef](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/09_coral_reef_3way.png)
-![10 autumn maples](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/10_autumn_maples_3way.png)
+![01 misty forest](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux2/images/01_misty_forest_3way.png)
+![02 rose gold portrait](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux2/images/02_rose_gold_portrait_3way.png)
+![03 neon tokyo](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux2/images/03_neon_tokyo_3way.png)
+![04 tuscany vineyard](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux2/images/04_tuscany_vineyard_3way.png)
+![05 arctic tundra](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux2/images/05_arctic_tundra_3way.png)
+![06 jazz club](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux2/images/06_jazz_club_3way.png)
+![07 cherry blossoms](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux2/images/07_cherry_blossoms_3way.png)
+![08 desert mesa](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux2/images/08_desert_mesa_3way.png)
+![09 coral reef](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux2/images/09_coral_reef_3way.png)
+![10 autumn maples](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux2/images/10_autumn_maples_3way.png)
 
 </details>
 
@@ -135,7 +135,7 @@ All 10 prompts reproduced within ±0.02× variance.
 
 ### δ vs speedup tradeoff
 
-![Speedup vs delta](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/speedup_vs_delta.png)
+![Speedup vs delta](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux2/images/speedup_vs_delta.png)
 
 Speedups are denoising-loop only. Curve shows the token-step theoretical model; filled points are wall-clock measurements. **δ=0.10 is the recommended tradeoff** (1.93× with no visible quality change).
 
