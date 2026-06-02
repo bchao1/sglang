@@ -100,12 +100,50 @@ scratch/spectral-progressive-z-image/
 
 ---
 
-## Benchmark Results (TBD — pending GPU run)
+## Bugs Fixed During Development (pre-existing Z-Image issues)
 
-Expected speedup formula (token-step, cfg_passes=2, patch_size=1):
-- Z-Image has cfg_passes=2 (dual CFG) vs FLUX's 1
-- Token-step speedup formula still applies (2 passes cancel out in ratio)
-- Baseline expected: same as FLUX (same VAE, same latent size)
+1. **negative_prompt_embeds batch dimension mismatch** — `_append_negative_text_outputs` used
+   `pe.shape[0]` as the target batch size. For Z-Image's 2-D embeddings `[seq_len, dim]`, `shape[0]`
+   is the sequence length, not the batch size (1). Fix: detect `ndim == 2` → treat as batch=1.
+
+2. **CuTeDSL fused kernel import failure** — Z-Image model and layernorm forward_cuda unconditionally
+   import `cutlass.cute` (CUTLASS 3.x Python bindings). `cutlass.cute` is not installed in the genAI
+   env. Fix: `_has_cutlass_cute` pre-check at module import; guards all three CUTLASS paths in
+   `zimage.py` and `layernorm.py`. Fallback to native RMSNorm path.
+
+---
+
+## Benchmark Results (GPU: RTX A6000 48GB, `--dit-cpu-offload false`, 50 steps, 1024×1024)
+
+### Group A — core configs
+
+| Config | Stage split | Denoise | Avg s/step | Speedup |
+|--------|-------------|---------|-----------|---------|
+| fullres | 50 @ 128² | 52.72 s | 1.054 s | 1.00× |
+| dct_rewind L1 δ=0.01 | 26@64² + 24@128² | 32.46 s | 0.649 s | **1.62×** |
+| dct_rewind L1 δ=0.05 | 35@64² + 15@128² | 25.41 s | 0.508 s | **2.07×** |
+| dct_rewind L2 δ=0.01 | 15@32² + 11@64² + 24@128² | 30.02 s | 0.600 s | **1.76×** |
+
+### Delta sweep (L1, each run on dedicated GPU)
+
+| δ | Denoise | Speedup |
+|---|---------|---------|
+| 0.01 | 34.38 s | 1.53× |
+| 0.05 | 26.03 s | 2.03× |
+| 0.10 | 22.65 s | **2.33×** ⭐ recommended |
+| 0.20 | 19.77 s | **2.66×** |
+| 0.50 | 17.74 s | **2.97×** |
+
+Z-Image consistently achieves higher progressive speedups than FLUX.1 at the same δ because
+dual CFG doubles the absolute attention savings.
+
+### FLUX.1 vs Z-Image comparison
+
+| δ | FLUX.1 | Z-Image | Ratio |
+|---|--------|---------|-------|
+| 0.01 | 1.32× | 1.53× | +16% |
+| 0.05 | 1.63× | 2.03× | +25% |
+| 0.10 | 1.83× | 2.33× | +27% |
 
 ---
 
@@ -113,3 +151,8 @@ Expected speedup formula (token-step, cfg_passes=2, patch_size=1):
 - 2026-06-01: Branch created from bchao1/spectral-progressive-flux; setup complete
 - 2026-06-01: Implementation complete — ZImageProgressiveDenoisingStage, pipeline wiring,
               unit tests (41/41 pass), manual test, scratch scripts
+- 2026-06-01: Fixed two pre-existing Z-Image bugs (negative embedding batch dim, CuTeDSL import)
+- 2026-06-01: All experiments complete. Group A: 1.62×/2.07×/1.76× at δ=0.01/0.05/L2.
+              Delta sweep: up to 2.97× at δ=0.50, best tradeoff 2.33× at δ=0.10.
+              10-prompt quality comparison (fullres | δ=0.05 | δ=0.10): all outputs artifact-free.
+              PR_description.md written.
