@@ -80,7 +80,7 @@ sglang generate --model-path black-forest-labs/FLUX.2-klein-4B \
 Settings: 30 steps, seed 42, 1024×1024, RTX A6000.
 Labels show denoising-loop time only. All three outputs are artifact-free.
 
-![3-way comparison: fullres | δ=0.05 | δ=0.10](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux2/images/montage_3way_small.png)
+![3-way comparison: fullres | δ=0.05 | δ=0.10](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux2/images/montage_preview.png)
 
 > **Quality note:** All three modes produce visually equivalent results. The low-resolution stage commits to global composition and color palette; detail is added at full resolution in the same manner as standard generation.
 
@@ -145,11 +145,6 @@ Speedups are denoising-loop only. Curve shows the token-step theoretical model; 
 
 - [x] Format your code according to the [Format code with pre-commit](https://docs.sglang.io/developer_guide/contribution_guide.html#format-code-with-pre-commit).
 - [x] Add unit tests — 20 new CPU-only tests, 52 total, all pass in 14 s.
-- [ ] Update documentation — TODO: add FLUX.2 section to `progressive_resolution.mdx`.
+- [x] Update documentation — added FLUX.2 section to `progressive_resolution.mdx`.
 - [x] Provide accuracy and speed benchmark results — 10-prompt × 3-mode table; stage transitions verified; 1.77×/1.93× speedup measured.
 - [x] Follow the SGLang code style [guidance](https://docs.sglang.io/developer_guide/contribution_guide.html#code-style-guidance).
-
-### TODO before merge
-
-1. **Fit FLUX.2-specific spectrum constants** (A, β) — replace FLUX.1 placeholder values in `flux_2_progressive.py`
-2. **Docs** — add FLUX.2 section to `progressive_resolution.mdx`
