@@ -62,9 +62,38 @@ runtime/pipelines/flux_2.py  (MODIFIED)
 ---
 
 ## Benchmark Results
-TODO: run benchmarks with FLUX.2-dev model
+
+### FLUX.2-klein-4B, 30 steps, 1024×1024, seed=42, torch_sdpa, GPU-resident (A6000 48GB)
+
+Warm-GPU runs (GPU fully warmed from prior runs, no JIT cold-start bias):
+
+| Config | Stage split | Denoise | Total | Speedup |
+|--------|------------|---------|-------|---------|
+| A1 fullres | 30 @ 64² | 9.72s | 12.33s | 1.00× |
+| A2 dct_rewind L1 δ=0.05 | 18@32² + 12@64² | 5.48s | 7.91s | **1.77×** |
+
+Token-step analysis (quadratic attention model):
+- Fullres: 30 × 4096 = 122,880 token-steps
+- Progressive: 18×1024 + 12×4096 = 67,584 token-steps
+- Expected speedup: **1.81×**
+- Wall-clock efficiency: **98%** (vs 94-96% for Flux.1; FLUX.2-klein-4B fixed overhead is smaller)
+
+Stage transition log (confirmed correct):
+- `Progressive denoising: mode=dct_rewind levels=1 delta=0.050 initial=32x32`
+- `Stage 1/2: 32x32 latent, steps [0, 18)` — 18 steps at 1024 tokens
+- `rewind: sigma=0.8500 → t_eff=0.9189 at step 18`
+- `Updated latent_ids and freqs_cis for 64x64 latent (pixel 1024x1024) across 1 branch(es)`
+- `Stage 2/2: 64x64 latent, steps [18, 30)` — 12 steps at 4096 tokens
+
+### Notes
+- Spectrum constants (A=203.615097, beta=1.915461) are Flux.1-dev placeholders
+- Transition at step 18/30 (delta=0.05): matches expected ~60% low-res split
+- FLUX.2-klein is distilled (no guidance), uses Qwen3 text encoder, Flux2Transformer2DModel
+- No image condition used (text-only generation, ImageVAEEncodingStage skips gracefully)
 
 ---
 
 ## Change Log
-- 2026-06-01: Initial implementation (Flux.2 progressive denoising), benchmarking TBD
+- 2026-06-01: Initial implementation (Flux.2 progressive denoising)
+- 2026-06-01: Benchmark on FLUX.2-klein-4B: 1.77× denoising speedup vs 1.81× predicted
+              (98% wall-clock efficiency). All stage transitions correct.
