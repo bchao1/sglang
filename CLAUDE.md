@@ -93,6 +93,35 @@ For all production code (anything going into a PR):
 
 ---
 
+## GPU Selection for Experiments
+
+A `PreToolUse` hook fires automatically for every `sglang generate`, benchmark
+script, or CUDA experiment command.  It runs `scratch/select_gpu.sh` and
+injects the best free GPU as `additionalContext`.
+
+**Non-negotiable rules when running any experiment or benchmark:**
+
+1. **Never hard-code a GPU index** — always source `scratch/select_gpu.sh`:
+   ```bash
+   source scratch/select_gpu.sh   # sets CUDA_VISIBLE_DEVICES in current shell
+   ```
+   or use the subprocess form inside scripts:
+   ```bash
+   export CUDA_VISIBLE_DEVICES=$(bash scratch/select_gpu.sh)
+   ```
+2. **If the hook fires and names a GPU** — use that GPU.  Do not override it
+   unless the user explicitly requests a specific GPU.
+3. **All new benchmark scripts** in `scratch/<feature>/` must include at the top:
+   ```bash
+   export CUDA_VISIBLE_DEVICES=N   # set by source scratch/select_gpu.sh
+   ```
+   or source the script directly from the repo root.
+
+The hook skips commands that already have `CUDA_VISIBLE_DEVICES` set, so
+manually pinned commands are never overridden.
+
+---
+
 ## Branch Naming
 
 - Feature branches: `bchao1/<feature-name>` (NOT `feature/<name>`)
