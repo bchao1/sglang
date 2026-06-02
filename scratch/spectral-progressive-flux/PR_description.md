@@ -81,23 +81,23 @@ All incompatible options are opt-in and **disabled by default**.
 Settings: 50 steps, seed 42, 1024×1024, GPU RTX A6000.
 Labels show denoising-loop time only. All three outputs are artifact-free.
 
-![3-way comparison: fullres | δ=0.05 | δ=0.10](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive_3way/montage_3way.png)
+![3-way comparison: fullres | δ=0.05 | δ=0.10](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux/images/progressive_3way/montage_3way.png)
 
 > **Quality note:** Progressive images at δ=0.05 and δ=0.10 have mean pixel diff ~1.3/255 vs each other, and ~22.7/255 vs fullres. All three modes produce visually equivalent results.
 
 <details>
 <summary>Fullres vs δ=0.05 side-by-side strips (10 prompts)</summary>
 
-![01 landscape](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/01_landscape_compare.png)
-![02 architecture](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/02_architecture_compare.png)
-![03 portrait](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/03_portrait_compare.png)
-![04 cityscape](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/04_cityscape_compare.png)
-![05 object](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/05_object_compare.png)
-![06 wildlife](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/06_wildlife_compare.png)
-![07 interior](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/07_interior_compare.png)
-![08 seascape](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/08_seascape_compare.png)
-![09 desert](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/09_desert_compare.png)
-![10 fantasy](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/10_fantasy_compare.png)
+![01 landscape](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux/images/progressive/01_landscape_compare.png)
+![02 architecture](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux/images/progressive/02_architecture_compare.png)
+![03 portrait](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux/images/progressive/03_portrait_compare.png)
+![04 cityscape](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux/images/progressive/04_cityscape_compare.png)
+![05 object](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux/images/progressive/05_object_compare.png)
+![06 wildlife](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux/images/progressive/06_wildlife_compare.png)
+![07 interior](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux/images/progressive/07_interior_compare.png)
+![08 seascape](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux/images/progressive/08_seascape_compare.png)
+![09 desert](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux/images/progressive/09_desert_compare.png)
+![10 fantasy](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux/images/progressive/10_fantasy_compare.png)
 
 </details>
 
@@ -150,7 +150,7 @@ All runs: 50 steps, seed 42, 1024×1024.
 
 ### δ vs speedup tradeoff
 
-![Speedup vs delta](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux/docs_new/images/progressive/speedup_vs_delta.png)
+![Speedup vs delta](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux/images/progressive/speedup_vs_delta.png)
 
 Speedups are denoising-loop only. All values measured on RTX A6000, 50 steps, 1024×1024.
 The curve flattens above δ≈0.1 — **δ=0.10 is the recommended tradeoff** (1.83× with undetectable quality change).
