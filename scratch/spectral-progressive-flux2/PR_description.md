@@ -4,7 +4,7 @@
 
 Transformer attention is O(n²) in sequence length. For FLUX.2 at 1024×1024, the denoising loop processes 4096 tokens per step. Running early steps at a coarser latent resolution (32×32 → 1024 tokens) reduces attention cost to ~6% for those steps, yielding a **1.77–1.93× denoising speedup** with no quality degradation.
 
-This PR extends **spectral progressive resolution growing** (introduced for FLUX.1 in [PR #26961](https://github.com/sgl-project/sglang/pull/26961)) to the **FLUX.2 pipeline family** (FLUX.2-dev, FLUX.2-klein-4B, FLUX.2-klein-9B). Early denoising steps run at a coarser latent resolution and the latent is spectrally upsampled via GPU DCT before the full-resolution steps.
+This PR extends **spectral progressive resolution growing** (introduced for FLUX.1 in [PR #26961](https://github.com/sgl-project/sglang/pull/26961)) to the **FLUX.2 pipeline family** (FLUX.2-klein-4B, FLUX.2-klein-9B). Early denoising steps run at a coarser latent resolution and the latent is spectrally upsampled via GPU DCT before the full-resolution steps.
 
 FLUX.2 differs from FLUX.1 in two ways that required new subclass logic:
 
@@ -81,8 +81,6 @@ Settings: 30 steps, seed 42, 1024×1024, RTX A6000.
 Labels show denoising-loop time only. All three outputs are artifact-free.
 
 ![3-way comparison: fullres | δ=0.05 | δ=0.10](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux2/images/montage_preview.png)
-
-> **Quality note:** All three modes produce visually equivalent results. The low-resolution stage commits to global composition and color palette; detail is added at full resolution in the same manner as standard generation.
 
 <details>
 <summary>Per-prompt 3-way comparison strips (10 prompts)</summary>
