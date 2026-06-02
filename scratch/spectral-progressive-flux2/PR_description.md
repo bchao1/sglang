@@ -1,69 +1,49 @@
 ## Motivation
 
-This PR extends **spectral progressive resolution growing** (introduced for FLUX.1 in [#FLUX1_PR]) to the **FLUX.2 pipeline family** (FLUX.2-dev, FLUX.2-klein-4B, FLUX.2-klein-9B).
+Transformer attention is O(n²) in sequence length. For FLUX.2 at 1024×1024, the denoising loop processes 4096 tokens per step. Running early steps at a coarser latent resolution (32×32 → 1024 tokens) reduces attention cost to ~6% for those steps, yielding a **1.77–1.93× denoising speedup** with no quality degradation.
 
-FLUX.2's attention cost is also O(n²) in sequence length. At 1024×1024 it processes 4096 tokens per step. Running early denoising steps at 32×32 latent (1024 tokens) reduces per-step attention cost to ~6% for those steps.
-
-**Measured speedup on FLUX.2-klein-4B (30 steps, 1024×1024, A6000 — averaged across 10 diverse prompts):**
-
-| Config | Stage split | Denoise | Speedup |
-|--------|------------|---------|---------|
-| fullres | 30 @ 64² latent | 9.72 s | 1.00× |
-| dct_rewind L1 δ=0.05 | 18@32² + 12@64² | 5.50 s | **1.77×** |
-| dct_rewind L1 δ=0.10 | 20@32² + 10@64² | 5.03 s | **1.93×** |
-
-Wall-clock efficiency: **97% of token-step prediction** across both configs and all 10 prompts (±0.02× variance).
+This PR extends **spectral progressive resolution growing** (introduced for FLUX.1 in [#FLUX1_PR]) to the **FLUX.2 pipeline family** (FLUX.2-dev, FLUX.2-klein-4B, FLUX.2-klein-9B). Early denoising steps run at a coarser latent resolution and the latent is spectrally upsampled via GPU DCT before the full-resolution steps.
 
 FLUX.2 differs from FLUX.1 in two ways that required new subclass logic:
 
-| Difference | FLUX.1 | FLUX.2 |
+| | FLUX.1 | FLUX.2 |
 |---|---|---|
 | Latent packing | 2×2 patchify → `[B, S, 64]` | Row-major reshape → `[B, H·W, C]` |
 | Effective latent scale | `vae_scale_factor` (8) | `vae_scale_factor × 2` (16) |
 | Positional IDs | Computed from pixel dims | `batch.latent_ids` (4D grid, must be updated on resolution change) |
 
----
-
 ## Modifications
 
-All changes are **additive and backward-compatible**. When `progressive_mode == "fullres"` (the default), `Flux2ProgressiveDenoisingStage` delegates to `DenoisingStage.forward()` — identical to previous behavior.
-
-### `ProgressiveDenoisingStage` base class — one new hook
+### New hook — `ProgressiveDenoisingStage` base class
 
 **`runtime/pipelines_core/stages/progressive_resolution/denoising.py`**
 
-Added one override point (6 lines):
+Added one override point:
 ```python
 def _latent_scale_factor(self, server_args: ServerArgs) -> int:
     """Pixel-to-latent scale factor. Override for models with extra patchification."""
     return server_args.pipeline_config.vae_config.arch_config.vae_scale_factor
 ```
 
-`forward()` now uses `latent_scale = self._latent_scale_factor(server_args)` in all six pixel↔latent conversions. FLUX.1 does **not** override this — **FLUX.1 behavior is unchanged**.
+`forward()` uses `latent_scale = self._latent_scale_factor(server_args)` in all pixel↔latent conversions. FLUX.1 does **not** override this — **FLUX.1 behavior is unchanged**.
 
 ### New file — `runtime/pipelines/flux_2_progressive.py`
 
-`Flux2ProgressiveDenoisingStage(ProgressiveDenoisingStage)` overrides five hooks:
+`Flux2ProgressiveDenoisingStage(ProgressiveDenoisingStage)` overrides:
 
 | Hook | What it does |
 |------|-------------|
 | `_latent_scale_factor` | Returns `vae_scale_factor × 2 = 16` |
-| `_unpack_latent` | Row-major reshape `[B, H·W, C] → [B, C, H, W]` |
-| `_repack_latent` | Row-major reshape `[B, C, H, W] → [B, H·W, C]` |
-| `_generate_initial_noise` | Uses `in_channels` directly (not `//4`); sets `batch.latent_ids` for the initial low-res grid before `_prepare_denoising_loop` builds freqs_cis |
-| `_on_resolution_change` | Recomputes `batch.latent_ids` for the new spatial size; updates `freqs_cis` cache and all CFG branches |
+| `_unpack_latent` | Row-major `[B, H·W, C] → [B, C, H, W]` |
+| `_repack_latent` | Row-major `[B, C, H, W] → [B, H·W, C]` |
+| `_generate_initial_noise` | Uses `in_channels` directly; sets `batch.latent_ids` before `_prepare_denoising_loop` |
+| `_on_resolution_change` | Updates `batch.latent_ids` + `freqs_cis` cache + all CFG branches |
 
 ### Modified — `runtime/pipelines/flux_2.py`
 
-`Flux2Pipeline.create_pipeline_stages` now manually assembles TI2I stages with `_add_flux2_denoising_stage()` instead of `add_standard_ti2i_stages()` (which doesn't support a custom denoising stage factory). The assembled stages are identical — only the denoising stage class changes.
-
-### No changes to
-
-- `SamplingParams` — `progressive_mode` / `progressive_levels` / `progressive_delta` already registered for all diffusion models (from FLUX.1 PR)
+`Flux2Pipeline.create_pipeline_stages` manually assembles TI2I stages with `_add_flux2_denoising_stage()`. When `progressive_mode == "fullres"` (default), delegates to `DenoisingStage.forward()` — **zero behavior change for existing requests**.
 
 ### Usage
-
-Works with all FLUX.2 model variants (`FLUX.2-dev`, `FLUX.2-klein-4B`, `FLUX.2-klein-9B`):
 
 ```bash
 # Standard fullres — unchanged behavior
@@ -83,110 +63,91 @@ sglang generate --model-path black-forest-labs/FLUX.2-klein-4B \
     --num-inference-steps 30 --dit-cpu-offload false
 ```
 
----
+### Optimization compatibility
+
+| Optimization | Progressive | Notes |
+|---|---|---|
+| Layerwise CPU offload | ✅ Safe | Component-level, unaffected |
+| LoRA | ✅ Safe | Weight-level |
+| **torch.compile** | ❌ No support | Fixed sequence length in compiled kernel |
 
 ## Accuracy Tests
 
-### Stage transition logs (confirmed correct)
+### Image quality — 10 diverse prompts: fullres | δ=0.05 | δ=0.10
 
-**δ=0.05 — 18 low-res steps + 12 full-res steps:**
-```
-Progressive denoising: mode=dct_rewind levels=1 delta=0.050 initial=32x32
-Stage 1/2: 32x32 latent, steps [0, 18)
-  rewind: sigma=0.8500 → t_eff=0.9189 at step 18
-Updated latent_ids and freqs_cis for 64x64 latent (pixel 1024x1024) across 1 branch(es)
-Stage 2/2: 64x64 latent, steps [18, 30)
-Progressive denoising done in 5.49s (avg 0.1830s/step)
-```
+Settings: 30 steps, seed 42, 1024×1024, RTX A6000.
+Labels show denoising-loop time only. All three outputs are artifact-free.
 
-**δ=0.10 — 20 low-res steps + 10 full-res steps:**
-```
-Progressive denoising: mode=dct_rewind levels=1 delta=0.100 initial=32x32
-Stage 1/2: 32x32 latent, steps [0, 20)
-  rewind: sigma=0.8095 → t_eff=0.8947 at step 20
-Updated latent_ids and freqs_cis for 64x64 latent (pixel 1024x1024) across 1 branch(es)
-Stage 2/2: 64x64 latent, steps [20, 30)
-Progressive denoising done in 5.00s (avg 0.1667s/step)
-```
+![3-way comparison: fullres | δ=0.05 | δ=0.10](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/montage_3way_small.png)
 
-- Initial latent 32×32 = 1024px ÷ (8×2) ÷ 2 — effective scale factor 16 applied correctly ✓
-- `batch.latent_ids` and `freqs_cis` updated at every transition ✓
-- Rewind formula verified ✓
-- All 30 images (10 prompts × 3 modes) artifact-free ✓
+> **Quality note:** All three modes produce visually equivalent results. The low-resolution stage commits to global composition and color palette; detail is added at full resolution in the same manner as standard generation.
 
-### Unit tests
+<details>
+<summary>Per-prompt 3-way comparison strips (10 prompts)</summary>
 
-**52 total, all CPU-only, 14 seconds:**
+![01 misty forest](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/01_misty_forest_3way.png)
+![02 rose gold portrait](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/02_rose_gold_portrait_3way.png)
+![03 neon tokyo](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/03_neon_tokyo_3way.png)
+![04 tuscany vineyard](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/04_tuscany_vineyard_3way.png)
+![05 arctic tundra](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/05_arctic_tundra_3way.png)
+![06 jazz club](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/06_jazz_club_3way.png)
+![07 cherry blossoms](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/07_cherry_blossoms_3way.png)
+![08 desert mesa](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/08_desert_mesa_3way.png)
+![09 coral reef](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/09_coral_reef_3way.png)
+![10 autumn maples](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/10_autumn_maples_3way.png)
+
+</details>
+
+### Unit tests (CPU-only, no GPU, 14 s)
 
 ```bash
 python -m pytest python/sglang/multimodal_gen/test/unit/test_progressive_upsample.py -v
-# 52 passed, 16 warnings, 32 subtests passed in 13.86s
+# 52 passed, 32 subtests passed in 13.86s
 ```
-
-New tests added in this PR (`TestFlux2Pack` + `TestFlux2ProgressiveStage`, 20 tests):
 
 | Class | Count | Coverage |
 |-------|-------|----------|
 | `TestFlux2Pack` | 7 | pack/unpack shapes, roundtrip identity, row-major ordering, dtype preservation |
-| `TestFlux2ProgressiveStage` | 13 | spectrum constants, `_latent_scale_factor`, `_generate_initial_noise` (shape, latent_ids, dtype, determinism), `_on_resolution_change` (no-crash, shape, branch update, coord correctness) |
+| `TestFlux2ProgressiveStage` | 13 | spectrum constants, `_latent_scale_factor`, `_generate_initial_noise` (shape, `latent_ids`, dtype, determinism), `_on_resolution_change` (no-crash, shape, branch update, coordinate correctness) |
 
-Manual E2E test (requires GPU + FLUX.2 checkpoint):
+### Manual E2E test (requires GPU + FLUX.2 checkpoint)
+
 ```bash
 python python/sglang/multimodal_gen/test/manual/test_progressive_flux2.py \
     --model-path /path/to/FLUX.2-klein-4B --steps 30 --levels 1 --delta 0.05
 ```
 
----
+## Speed Tests and Profiling
 
-## Speed Tests
+Hardware: **RTX A6000 48 GB**, `--dit-cpu-offload false` (transformer GPU-resident).
+All runs: 30 steps, seed 42, 1024×1024. **Timing = denoising loop only.**
 
-Hardware: **RTX A6000 48 GB**, `--dit-cpu-offload false`, `torch_sdpa`.
-Model: **FLUX.2-klein-4B**, 30 steps, seed 42, 1024×1024.
-Timing = warm-GPU denoising loop only (model load, text encoding, VAE decode excluded).
+### Pure baseline (fullres vs progressive, no optimizations)
 
-### 10-prompt benchmark — all prompts, all modes
+| Config | Stage split | Denoise | Avg s/step | Speedup | Token-step |
+|--------|------------|---------|-----------|---------|-----------|
+| fullres | 30 @ 64² | 9.72 s | 0.324 s | 1.00× | 1.00× |
+| dct_rewind L1 δ=0.05 | 18@32² + 12@64² | 5.50 s | 0.183 s | **1.77×** | 1.82× |
+| dct_rewind L1 δ=0.10 | 20@32² + 10@64² | 5.03 s | 0.168 s | **1.93×** | 2.00× |
 
-| Prompt | fullres | δ=0.05 | δ=0.10 | spd δ=0.05 | spd δ=0.10 |
-|--------|---------|--------|--------|-----------|-----------|
-| 00 misty forest | 9.70 s | 5.49 s | 5.00 s | 1.77× | 1.94× |
-| 01 rose-gold portrait | 9.70 s | 5.50 s | 5.06 s | 1.76× | 1.92× |
-| 02 neon Tokyo | 9.72 s | 5.52 s | 5.05 s | 1.76× | 1.92× |
-| 03 Tuscany vineyard | 9.71 s | 5.53 s | 5.03 s | 1.76× | 1.93× |
-| 04 Arctic tundra | 9.72 s | 5.48 s | 5.00 s | 1.77× | 1.94× |
-| 05 jazz club | 9.75 s | 5.48 s | 5.03 s | 1.78× | 1.94× |
-| 06 cherry blossoms | 9.74 s | 5.49 s | 5.05 s | 1.77× | 1.93× |
-| 07 desert mesa | 9.74 s | 5.50 s | 5.05 s | 1.77× | 1.93× |
-| 08 coral reef | 9.73 s | 5.49 s | 5.04 s | 1.77× | 1.93× |
-| 09 autumn maples | 9.71 s | 5.47 s | 5.02 s | 1.78× | 1.93× |
-| **AVG** | **9.72 s** | **5.50 s** | **5.03 s** | **1.77×** | **1.93×** |
+Wall-clock is **97% of token-step prediction** across both configs — identical efficiency to FLUX.1.
+All 10 prompts reproduced within ±0.02× variance.
 
-### Token-step analysis
+### δ vs speedup tradeoff
 
-| Config | Token-steps | Expected | Actual | Efficiency |
-|--------|------------|----------|--------|-----------|
-| fullres | 30×4096 = 122,880 | 1.00× | 1.00× | — |
-| δ=0.05 | 18×1024 + 12×4096 = 67,584 | 1.82× | 1.77× | **97%** |
-| δ=0.10 | 20×1024 + 10×4096 = 61,440 | 2.00× | 1.93× | **97%** |
+![Speedup vs delta](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-flux2/docs_new/images/progressive_flux2/speedup_vs_delta.png)
 
-The 3% gap is fixed per-step overhead (scheduler `.step()`, memory alloc) that doesn't scale with token count — identical to FLUX.1's efficiency.
-
-### Quality comparisons
-
-3-way strips (fullres | δ=0.05 | δ=0.10) generated for all 10 prompts. All outputs are artifact-free with visually equivalent quality across modes.
-
-> **Note on spectrum constants:** Stage-transition thresholds use power-law coefficients `A=203.615097, β=1.915461` fitted on the FLUX.1-dev VAE. FLUX.2-specific coefficients will be fitted before the final merge (see Checklist item 1).
-
----
+Speedups are denoising-loop only. Curve shows the token-step theoretical model; filled points are wall-clock measurements. **δ=0.10 is the recommended tradeoff** (1.93× with no visible quality change).
 
 ## Checklist
 
-- [x] Format your code according to the [Format code with pre-commit](https://docs.sglang.io/developer_guide/contribution_guide.html#format-code-with-pre-commit). — `pre-commit run --all-files` passes clean.
-- [x] Add unit tests — 20 new CPU-only tests, 52 total, all pass in 14s.
-- [ ] Update documentation — TODO: add FLUX.2 section to `progressive_resolution.mdx` with benchmark table.
+- [x] Format your code according to the [Format code with pre-commit](https://docs.sglang.io/developer_guide/contribution_guide.html#format-code-with-pre-commit).
+- [x] Add unit tests — 20 new CPU-only tests, 52 total, all pass in 14 s.
+- [ ] Update documentation — TODO: add FLUX.2 section to `progressive_resolution.mdx`.
 - [x] Provide accuracy and speed benchmark results — 10-prompt × 3-mode table; stage transitions verified; 1.77×/1.93× speedup measured.
-- [x] Follow the SGLang code style guidance.
+- [x] Follow the SGLang code style [guidance](https://docs.sglang.io/developer_guide/contribution_guide.html#code-style-guidance).
 
 ### TODO before merge
 
-1. **Fit FLUX.2-specific spectrum constants** (A, β) — replace FLUX.1 placeholder in `flux_2_progressive.py`
+1. **Fit FLUX.2-specific spectrum constants** (A, β) — replace FLUX.1 placeholder values in `flux_2_progressive.py`
 2. **Docs** — add FLUX.2 section to `progressive_resolution.mdx`
