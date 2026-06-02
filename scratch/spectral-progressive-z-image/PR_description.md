@@ -1,8 +1,10 @@
+> **⚠️ Stacked PR:** Depends on the FLUX.1 progressive PR ([PR #XXXX](https://github.com/sgl-project/sglang/pull/XXXX)). The Z-Image-specific changes are the top 2 commits: `feat: progressive resolution growing for Z-Image` and `fix: Z-Image negative embedding batch dim, CuTeDSL fallback`. All earlier commits belong to the FLUX PR and can be ignored during review.
+
 ## Motivation
 
-Transformer attention is O(n²) in sequence length. For Z-Image at 1024×1024, each denoising step runs **dual CFG** (two forward passes) on 4096 tokens. Running early steps at a coarser latent resolution (e.g., 64×64 → 128×128 tokens) reduces per-step attention cost to 6.25% for those steps, yielding a **2.07× denoising speedup** at δ=0.05 — outperforming FLUX.1 progressive (1.62×) because dual CFG amplifies the attention savings.
+Transformer attention is O(n²) in sequence length. For Z-Image at 1024×1024, each denoising step runs **dual CFG** (two forward passes) on 4096 tokens. Running early steps at a coarser latent resolution (e.g., 64×64 → 128×128 tokens) reduces per-step attention cost to 6.25% for those steps, yielding a **2.07× denoising speedup** at δ=0.05.
 
-This PR extends the spectral progressive resolution framework from FLUX.1 ([PR #XXXX](https://github.com/sgl-project/sglang/pull/XXXX)) to **Z-Image**, implementing the model-specific hooks required to handle Z-Image's 5-D latent format and caption+image RoPE positional embeddings.
+This PR extends the spectral progressive resolution framework from FLUX.1 ([PR #26961](https://github.com/sgl-project/sglang/pull/26961)) to **Z-Image**, implementing the model-specific hooks required to handle Z-Image's 5-D latent format and caption+image RoPE positional embeddings.
 
 ## Modifications
 
@@ -160,3 +162,29 @@ Z-Image consistently achieves higher progressive speedups than FLUX.1 at the sam
 - [x] Add unit tests according to [Run and add unit tests](https://docs.sglang.io/developer_guide/contribution_guide.html#run-and-add-unit-tests). — 10 new CPU-only unit tests in `TestZImagePackUnpack`; all 41 tests pass.
 - [x] Provide accuracy and speed benchmark results according to [Test the accuracy](https://docs.sglang.io/developer_guide/contribution_guide.html#test-the-accuracy) and [Benchmark the speed](https://docs.sglang.io/developer_guide/contribution_guide.html#benchmark-the-speed). — 10-prompt image comparison + Group A / delta-sweep benchmarks above.
 - [x] Follow the SGLang code style [guidance](https://docs.sglang.io/developer_guide/contribution_guide.html#code-style-guidance).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- pr-states:start -->
+---
+### CI States
+
+Latest PR Test (Base): <!-- slot:pr-test:start -->:x: [Run #26791815970](https://github.com/bchao1/sglang/actions/runs/26791815970)<!-- slot:pr-test:end -->
+Latest PR Test (Extra): <!-- slot:pr-test-extra:start -->:x: [Run #26791815898](https://github.com/bchao1/sglang/actions/runs/26791815898)<!-- slot:pr-test-extra:end -->
+<!-- pr-states:end -->
