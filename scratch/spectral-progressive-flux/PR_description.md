@@ -161,26 +161,8 @@ The curve flattens above δ≈0.1 — **δ=0.10 is the recommended tradeoff** (1
 | 0.01 | **1.32×** | Conservative — same quality as fullres |
 | 0.05 | **1.63×** | Default recommendation |
 | **0.10** | **1.83×** | ⭐ Best quality/speed tradeoff |
-| 0.20 | **2.02×** | Slightly more aggressive; still visually equivalent |
-| 0.50 | **2.36×** | Maximum tested; quality remains good |
-
-### 10-prompt quality benchmark (denoising-only timing, δ=0.05)
-
-Same hardware, same settings as Group A above. Verified across 10 diverse subjects.
-
-| Prompt | Denoise fullres | Denoise progressive | **Speedup** |
-|--------|----------------|---------------------|-------------|
-| 01 landscape | 36.6 s | 22.6 s | **1.62×** |
-| 02 architecture | 36.8 s | 22.6 s | **1.63×** |
-| 03 portrait | 36.8 s | 22.6 s | **1.63×** |
-| 04 cityscape | 36.8 s | 22.6 s | **1.63×** |
-| 05 object | 36.8 s | 22.6 s | **1.63×** |
-| 06 wildlife | 36.8 s | 22.6 s | **1.63×** |
-| 07 interior | 36.7 s | 22.7 s | **1.62×** |
-| 08 seascape | 36.9 s | 22.6 s | **1.63×** |
-| 09 desert | 36.9 s | 22.6 s | **1.63×** |
-| 10 fantasy | 36.8 s | 22.6 s | **1.63×** |
-| **Average** | **36.8 s** | **22.6 s** | **1.63×** |
+| 0.20 | **2.02×** | Slightly more aggressive; some prompts are good |
+| 0.50 | **2.36×** | Maximum tested; visible degradation |
 
 ## Checklist
 
@@ -189,13 +171,6 @@ Same hardware, same settings as Group A above. Verified across 10 diverse subjec
 - [x] Update documentation according to [Write documentations](https://docs.sglang.io/developer_guide/contribution_guide.html#write-documentations). — Added `docs_new/docs/sglang-diffusion/progressive_resolution.mdx` under **SGLang Diffusion → Performance Optimization**.
 - [x] Provide accuracy and speed benchmark results according to [Test the accuracy](https://docs.sglang.io/developer_guide/contribution_guide.html#test-the-accuracy) and [Benchmark the speed](https://docs.sglang.io/developer_guide/contribution_guide.html#benchmark-the-speed). — 10-prompt image comparison + Group A/D denoising benchmarks above.
 - [x] Follow the SGLang code style [guidance](https://docs.sglang.io/developer_guide/contribution_guide.html#code-style-guidance). — import ordering, no unused imports, `batch_sig_exclude`, alphabetical `__all__`.
-
-
-
-
-
-
-
 
 <!-- pr-states:start -->
 ---
