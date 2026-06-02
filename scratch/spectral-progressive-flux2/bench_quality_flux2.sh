@@ -10,7 +10,7 @@ FLUX2_MODEL="/miele/brian/modelscope/black-forest-labs/FLUX.2-klein-4B"
 STEPS=30
 SEED=42
 
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=6
 export FLASHINFER_DISABLE_VERSION_CHECK=1
 
 TS=$(date +%Y%m%d_%H%M%S)
