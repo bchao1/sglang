@@ -12,9 +12,16 @@ cmd=$(echo "$INPUT" | python3 -c \
     "import sys,json; d=json.load(sys.stdin); print(d.get('tool_input',{}).get('command',''))" \
     2>/dev/null)
 
-# Only fire for experiment-like commands
+# Only fire for commands that are clearly GPU experiment invocations.
+# Patterns require an actual executable/flag, not just a keyword in a string
+# (e.g. git commit messages containing "diffusion" must not trigger this).
 if ! echo "$cmd" | grep -qE \
-    '(sglang (generate|serve)|bench_.*\.sh|quality.*\.sh|FLASHINFER|dit-cpu-offload|progressive-mode|diffusion)'; then
+    '(sglang (generate|serve)|bench_.*\.sh|quality.*\.sh|FLASHINFER_DISABLE|--dit-cpu-offload|--progressive-mode)'; then
+    exit 0
+fi
+
+# Self-test exclusion: don't fire when testing the hook itself
+if echo "$cmd" | grep -q 'gpu_hook'; then
     exit 0
 fi
 
