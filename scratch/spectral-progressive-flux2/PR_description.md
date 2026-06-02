@@ -4,7 +4,16 @@
 
 Transformer attention is O(n²) in sequence length. For FLUX.2 at 1024×1024, the denoising loop processes 4096 tokens per step. Running early steps at a coarser latent resolution (32×32 → 1024 tokens) reduces attention cost to ~6% for those steps, yielding a **1.77–1.93× denoising speedup** with no quality degradation.
 
-This PR extends **spectral progressive resolution growing** (introduced for FLUX.1 in [PR #26961](https://github.com/sgl-project/sglang/pull/26961)) to the **FLUX.2 pipeline family** (FLUX.2-klein-4B, FLUX.2-klein-9B). Early denoising steps run at a coarser latent resolution and the latent is spectrally upsampled via GPU DCT before the full-resolution steps.
+This PR extends **spectral progressive resolution growing** (introduced for FLUX.1 in [PR #26961](https://github.com/sgl-project/sglang/pull/26961)) to the **FLUX.2 pipeline family**. Early denoising steps run at a coarser latent resolution and the latent is spectrally upsampled via GPU DCT before the full-resolution steps.
+
+| Model | HuggingFace ID |
+|-------|---------------|
+| FLUX.2-dev | `black-forest-labs/FLUX.2-dev` |
+| FLUX.2-dev-NVFP4 | `black-forest-labs/FLUX.2-dev-NVFP4` |
+| FLUX.2-Klein-4B | `black-forest-labs/FLUX.2-klein-4B` |
+| FLUX.2-Klein-9B | `black-forest-labs/FLUX.2-klein-9B` |
+| FLUX.2-Klein-Base-4B | `black-forest-labs/FLUX.2-klein-base-4B` |
+| FLUX.2-Klein-Base-9B | `black-forest-labs/FLUX.2-klein-base-9B` |
 
 FLUX.2 differs from FLUX.1 in two ways that required new subclass logic:
 
@@ -137,7 +146,7 @@ All 10 prompts reproduced within ±0.02× variance.
 
 ![Speedup vs delta](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux2/images/speedup_vs_delta.png)
 
-Speedups are denoising-loop only; points are wall-clock measurements. **δ=0.10 is the recommended tradeoff** (1.93× with no visible quality change).
+Speedups are denoising-loop only. Curve shows the token-step theoretical model; filled points are wall-clock measurements. **δ=0.10 is the recommended tradeoff** (1.93× with no visible quality change).
 
 ## Checklist
 
@@ -146,3 +155,35 @@ Speedups are denoising-loop only; points are wall-clock measurements. **δ=0.10 
 - [x] Update documentation — added FLUX.2 section to `progressive_resolution.mdx`.
 - [x] Provide accuracy and speed benchmark results — 10-prompt × 3-mode table; stage transitions verified; 1.77×/1.93× speedup measured.
 - [x] Follow the SGLang code style [guidance](https://docs.sglang.io/developer_guide/contribution_guide.html#code-style-guidance).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- pr-states:start -->
+---
+### CI States
+
+Latest PR Test (Base): <!-- slot:pr-test:start -->:x: [Run #26837020535](https://github.com/sgl-project/sglang/actions/runs/26837020535)<!-- slot:pr-test:end -->
+Latest PR Test (Extra): <!-- slot:pr-test-extra:start -->:x: [Run #26837019522](https://github.com/sgl-project/sglang/actions/runs/26837019522)<!-- slot:pr-test-extra:end -->
+<!-- pr-states:end -->
