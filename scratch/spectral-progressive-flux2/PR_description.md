@@ -137,7 +137,7 @@ All 10 prompts reproduced within ±0.02× variance.
 
 ![Speedup vs delta](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-flux2/images/speedup_vs_delta.png)
 
-Speedups are denoising-loop only. Curve shows the token-step theoretical model; filled points are wall-clock measurements. **δ=0.10 is the recommended tradeoff** (1.93× with no visible quality change).
+Speedups are denoising-loop only; points are wall-clock measurements. **δ=0.10 is the recommended tradeoff** (1.93× with no visible quality change).
 
 ## Checklist
 
