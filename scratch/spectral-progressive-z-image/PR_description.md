@@ -71,21 +71,21 @@ sglang generate --model-path Tongyi-MAI/Z-Image \
 Settings: 50 steps, seed 42, 1024×1024, GPU RTX A6000, `--dit-cpu-offload false`.
 Labels show denoising-loop time only. All outputs are artifact-free.
 
-![3-way comparison: fullres | δ=0.05 | δ=0.10](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-z-image/docs_new/images/progressive_zimage_3way/montage_3way.png)
+![3-way comparison: fullres | δ=0.05 | δ=0.10](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-z-image/pr_visuals/progressive_zimage_3way/montage_3way.jpg)
 
 <details>
 <summary>Fullres vs δ=0.05 side-by-side strips (10 prompts)</summary>
 
-![01 landscape](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-z-image/docs_new/images/progressive_zimage/01_landscape_compare.png)
-![02 architecture](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-z-image/docs_new/images/progressive_zimage/02_architecture_compare.png)
-![03 portrait](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-z-image/docs_new/images/progressive_zimage/03_portrait_compare.png)
-![04 cityscape](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-z-image/docs_new/images/progressive_zimage/04_cityscape_compare.png)
-![05 object](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-z-image/docs_new/images/progressive_zimage/05_object_compare.png)
-![06 wildlife](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-z-image/docs_new/images/progressive_zimage/06_wildlife_compare.png)
-![07 interior](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-z-image/docs_new/images/progressive_zimage/07_interior_compare.png)
-![08 seascape](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-z-image/docs_new/images/progressive_zimage/08_seascape_compare.png)
-![09 desert](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-z-image/docs_new/images/progressive_zimage/09_desert_compare.png)
-![10 fantasy](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-z-image/docs_new/images/progressive_zimage/10_fantasy_compare.png)
+![01 landscape](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-z-image/pr_visuals/progressive_zimage/01_landscape_compare.png)
+![02 architecture](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-z-image/pr_visuals/progressive_zimage/02_architecture_compare.png)
+![03 portrait](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-z-image/pr_visuals/progressive_zimage/03_portrait_compare.png)
+![04 cityscape](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-z-image/pr_visuals/progressive_zimage/04_cityscape_compare.png)
+![05 object](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-z-image/pr_visuals/progressive_zimage/05_object_compare.png)
+![06 wildlife](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-z-image/pr_visuals/progressive_zimage/06_wildlife_compare.png)
+![07 interior](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-z-image/pr_visuals/progressive_zimage/07_interior_compare.png)
+![08 seascape](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-z-image/pr_visuals/progressive_zimage/08_seascape_compare.png)
+![09 desert](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-z-image/pr_visuals/progressive_zimage/09_desert_compare.png)
+![10 fantasy](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-z-image/pr_visuals/progressive_zimage/10_fantasy_compare.png)
 
 </details>
 
@@ -132,7 +132,7 @@ Hardware: **RTX A6000 48 GB**, `--dit-cpu-offload false` (transformer GPU-reside
 
 ### δ vs speedup tradeoff
 
-![Speedup vs delta](https://raw.githubusercontent.com/bchao1/sglang/bchao1/spectral-progressive-z-image/docs_new/images/progressive_zimage/speedup_vs_delta.png)
+![Speedup vs delta](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-z-image/pr_visuals/progressive_zimage/speedup_vs_delta.png)
 
 Speedups measured on RTX A6000, 50 steps, 1024×1024, denoising loop only. **δ=0.10 is the recommended tradeoff** (2.33× speedup with visually equivalent quality).
 
