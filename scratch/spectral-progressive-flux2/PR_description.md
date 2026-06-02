@@ -1,8 +1,10 @@
+> **⚠️ Stacked PR:** Depends on the FLUX.1 progressive PR ([PR #26961](https://github.com/sgl-project/sglang/pull/26961)). The FLUX.2-specific change is the top commit: `feat(diffusion): extend progressive resolution growing to FLUX.2`. All earlier commits belong to the FLUX.1 PR and can be ignored during review.
+
 ## Motivation
 
 Transformer attention is O(n²) in sequence length. For FLUX.2 at 1024×1024, the denoising loop processes 4096 tokens per step. Running early steps at a coarser latent resolution (32×32 → 1024 tokens) reduces attention cost to ~6% for those steps, yielding a **1.77–1.93× denoising speedup** with no quality degradation.
 
-This PR extends **spectral progressive resolution growing** (introduced for FLUX.1 in [#FLUX1_PR]) to the **FLUX.2 pipeline family** (FLUX.2-dev, FLUX.2-klein-4B, FLUX.2-klein-9B). Early denoising steps run at a coarser latent resolution and the latent is spectrally upsampled via GPU DCT before the full-resolution steps.
+This PR extends **spectral progressive resolution growing** (introduced for FLUX.1 in [PR #26961](https://github.com/sgl-project/sglang/pull/26961)) to the **FLUX.2 pipeline family** (FLUX.2-dev, FLUX.2-klein-4B, FLUX.2-klein-9B). Early denoising steps run at a coarser latent resolution and the latent is spectrally upsampled via GPU DCT before the full-resolution steps.
 
 FLUX.2 differs from FLUX.1 in two ways that required new subclass logic:
 
