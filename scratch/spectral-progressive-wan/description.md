@@ -1,6 +1,6 @@
 # Progressive Resolution Growing — Wan T2V Video
 
-## Status: 🚧 CPU tests passing, GPU benchmark TBD
+## Status: 🚧 CPU tests passing, GPU benchmark running
 **Branch:** `bchao1/spectral-progressive-wan`
 **Base:** `bchao1/spectral-progressive-flux` (inherits GPU DCT ops + base stage infrastructure)
 
@@ -61,6 +61,47 @@ scratch/spectral-progressive-wan/description.md
 runtime/pipelines/wan_pipeline.py             # wire in _add_wan_denoising_stage
 configs/models/vaes/wanvae.py                 # add vae_scale_factor to WanVAEArchConfig
 ```
+
+---
+
+## Reference Parameter Audit (`wavelet-diffusion/inference_progressive.py`)
+
+All benchmark runs use exactly these parameters to match the reference. **Deviating from
+these when re-running will invalidate comparisons with the reference implementation.**
+
+| Parameter | Reference value | sglang default | Benchmark override |
+|-----------|----------------|----------------|-------------------|
+| height × width | 480 × 832 | 480 × 832 | none (already matches) |
+| num_frames | 81 | 81 | none |
+| num_inference_steps | 50 (`WAN_N_STEPS`) | 50 | none |
+| guidance_scale | 5.0 (`WAN_GUIDANCE_SCALE`) | **3.0** | `--guidance-scale 5.0` |
+| flow_shift | 5.0 (`WAN_SHIFT`) | **3.0** | `--flow-shift 5.0` |
+| scheduler | `FlowMatchEulerDiscreteScheduler` | `FlowUniPCMultistepScheduler` | *not changed* |
+| seed | 42 | — | `--seed 42` |
+
+### Sigma schedule impact (δ=0.05, L=1)
+
+The two non-default params (guidance_scale, flow_shift) materially affect stage transitions:
+
+| Schedule | Shift | Transition step / 50 | Token-step speedup (theory) |
+|----------|-------|----------------------|-----------------------------|
+| Reference | 5.0 | step 33 (σ≈0.720) | **1.98×** |
+| sglang default | 3.0 | step 26 (σ≈0.735) | 1.64× |
+| **Benchmark** | **5.0** | **step 33** | **1.98×** |
+
+With shift=5.0 the scheduler decays slower → more steps remain below the transition sigma →
+stage 1 (half-resolution) runs longer → more token-step savings.
+
+The scheduler solver (`UniPC` vs `Euler`) affects denoising trajectory but NOT the sigma
+schedule or stage transitions. `UniPC` is higher-order and generally produces better quality
+at the same step count; the reference used Euler as a simpler baseline.
+
+### How flow_shift=5.0 is passed in the benchmark script
+
+`flow_shift` is a `PipelineConfig` CLI flag (`--flow-shift`). Unlike `guidance_scale`, it
+cannot be overridden per-request — it is set once at server/pipeline init time. The benchmark
+script passes `--flow-shift 5.0` to `sglang generate`, which overrides the `WanT2V480PConfig`
+default of 3.0 for that run only. The sglang codebase default is NOT changed.
 
 ---
 
