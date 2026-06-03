@@ -26,16 +26,23 @@ OUT.parent.mkdir(parents=True, exist_ok=True)
 # ── Load measured values ──────────────────────────────────────────────────────
 known = {}
 
-# 1. Find fullres baseline from Group A benchmark
+# 1. Find fullres baseline from Group A benchmark (skip malformed files)
 baseline = None
 bench_files = sorted(RESULTS.glob("bench_*/timing_group_a.json"))
-if bench_files:
-    bench_data = json.load(open(bench_files[-1]))
-    for r in bench_data:
-        if "A1" in r["label"]:
-            baseline = r.get("denoise_s") or r.get("wall_s")
-            print(f"Baseline (fullres denoise): {baseline:.2f}s  [from {bench_files[-1].parent.name}]")
+for bench_path in reversed(bench_files):
+    try:
+        bench_data = json.load(open(bench_path))
+        if not bench_data:
+            continue
+        for r in bench_data:
+            if "A1" in r["label"]:
+                baseline = r.get("denoise_s") or r.get("wall_s")
+                print(f"Baseline (fullres denoise): {baseline:.2f}s  [from {bench_path.parent.name}]")
+                break
+        if baseline:
             break
+    except (json.JSONDecodeError, KeyError):
+        continue
 
 # 2. Load delta sweep timings
 sweep_files = sorted(RESULTS.glob("delta_sweep_*/delta_timing.json"))
@@ -51,8 +58,7 @@ if sweep_files:
             print(f"  delta={d}: {known[d]:.3f}x")
 
 # 3. Also pull Group A results for any delta points measured there
-if bench_files:
-    bench_data = json.load(open(bench_files[-1]))
+if bench_data:
     for r in bench_data:
         if "A1" not in r["label"] and baseline:
             # Extract delta from label (e.g. A2_dct_rw_L1_d0.05)

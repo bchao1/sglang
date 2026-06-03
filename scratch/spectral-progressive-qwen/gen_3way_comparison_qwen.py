@@ -30,11 +30,11 @@ DELTA_B = "0.10"
 SOURCES = {
     "fullres": SCRATCH / "results" / "pr_images",
     DELTA_A: SCRATCH / "results" / "pr_images",
-    DELTA_B: SCRATCH / "results" / "pr_images_d2",
+    DELTA_B: SCRATCH / "results" / "pr_images_d10",
 }
 TIMING = {
     DELTA_A: SCRATCH / "results" / "pr_images" / "timing.json",
-    DELTA_B: SCRATCH / "results" / "pr_images_d2" / "timing.json",
+    DELTA_B: SCRATCH / "results" / "pr_images_d10" / "timing.json",
 }
 # ─────────────────────────────────────────────────────────────────────────────
 
