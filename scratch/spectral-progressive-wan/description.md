@@ -199,6 +199,28 @@ Videos saved:
 
 ---
 
+## Delta Sweep (2026-06-03) — Dynamic scene (F1 race car)
+
+**Run:** `delta_sweep_20260603_171818` — GPU 0 (RTX A6000 48GB)
+**Prompt:** "A Formula 1 race car speeding through a circuit at sunset, motion blur, photorealistic"
+**Params:** 50 steps · 480×832 · 81 frames · guidance=5.0 · flow\_shift=5.0 · seed=42 · L=1
+
+| Config | Denoise (s) | Total (s) | Transition step | Speedup (denoise) |
+|--------|-------------|-----------|-----------------|-------------------|
+| fullres | 266.8s | 284.1s | — | 1.00× |
+| dct\_rewind δ=0.01 | 161.5s | 178.7s | 23/50 | 1.65× |
+| dct\_rewind δ=0.02 | 142.7s | 160.3s | 27/50 | 1.86× |
+| dct\_rewind δ=0.05 | 114.7s | 131.7s | 33/50 | 2.32× |
+| dct\_rewind δ=0.10 | **95.9s** | **113.0s** | 37/50 | **2.78×** |
+
+**Speedup vs δ:** monotonically increasing — larger δ lowers the activation threshold, firing the transition later (more steps at low-res). δ=0.10 reaches **2.78×** denoise speedup, **2.51×** wall-clock.
+
+**Transition steps** match theory for shift=5.0 schedule exactly (steps 23, 27, 33, 37).
+
+**Quality note:** All 5 videos generated without artifacts. Visual inspection required to assess whether δ=0.10 (37/50 steps at 30×52) retains sufficient fine detail for motion-heavy scenes.
+
+---
+
 ## Optimization Compatibility
 
 | Optimization | Progressive | Notes |
