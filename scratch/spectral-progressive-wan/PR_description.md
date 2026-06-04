@@ -121,9 +121,20 @@ Settings: **50 steps**, seed 42, **480×832**, 81 frames, guidance=5.0, flow\_sh
 
 **Prompt:** *"A massive thunderstorm rolling across an empty African savanna at dusk, lightning bolts striking the horizon, mammoth cumulonimbus clouds lit from within, photorealistic cinematic"*
 
-| Fullres (266.9s) | δ=0.01 — **1.65×** (161.5s) | δ=0.02 — **1.86×** (142.7s) | δ=0.05 — **2.32×** (114.8s) |
-|:---:|:---:|:---:|:---:|
-| [▶ fullres.mp4](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/p01/p01_fullres.mp4) | [▶ d0.01.mp4](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/p01/p01_0.01.mp4) | [▶ d0.02.mp4](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/p01/p01_0.02.mp4) | [▶ d0.05.mp4](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/p01/p01_0.05.mp4) |
+<table>
+<tr>
+  <th align="center">Fullres — 266.9s</th>
+  <th align="center">δ=0.01 — <b>1.65×</b> — 161.5s</th>
+  <th align="center">δ=0.02 — <b>1.86×</b> — 142.7s</th>
+  <th align="center">δ=0.05 — <b>2.32×</b> — 114.8s</th>
+</tr>
+<tr>
+  <td><video src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/p01/p01_fullres.mp4" controls muted width="100%"></video></td>
+  <td><video src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/p01/p01_0.01.mp4" controls muted width="100%"></video></td>
+  <td><video src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/p01/p01_0.02.mp4" controls muted width="100%"></video></td>
+  <td><video src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/p01/p01_0.05.mp4" controls muted width="100%"></video></td>
+</tr>
+</table>
 
 All outputs are artifact-free. Denoising times shown; total wall-clock includes text encoding + VAE decode (~17s each).
 
