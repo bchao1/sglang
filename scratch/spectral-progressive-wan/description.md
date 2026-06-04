@@ -1,6 +1,6 @@
 # Progressive Resolution Growing — Wan T2V Video
 
-## Status: 🚧 CPU tests passing, GPU benchmark running
+## Status: ✅ Working — first GPU benchmark complete
 **Branch:** `bchao1/spectral-progressive-wan`
 **Base:** `bchao1/spectral-progressive-flux` (inherits GPU DCT ops + base stage infrastructure)
 
@@ -174,21 +174,28 @@ Run: `python -m pytest python/sglang/multimodal_gen/test/unit/test_progressive_w
 
 ---
 
-## Benchmark Results (GPU — TBD)
-*To be filled in after GPU visual generation test.*
+## Benchmark Results (GPU)
 
-Expected speedup (theory, token-step formula):
-- δ=0.01 L1 (earlier Wan transitions vs FLUX): ~1.3–1.5×
-- δ=0.05 L1 (more steps at coarse res): ~1.5–1.7×
+**Run:** `bench_20260603_170457` — GPU 0 (RTX A6000 48GB), 2026-06-03
+**Model:** `Wan-AI/Wan2.1-T2V-1.3B-Diffusers`, 50 steps, 480×832, 81 frames
+**Params:** guidance=5.0, flow_shift=5.0, seed=42 (reference-matched)
+**Note:** CuTeDSL fused kernels disabled (`cutlass.cute` absent, native fallback active).
+Results are conservative; fused kernels would reduce both R1 and R2 equally.
 
-Run:
-```bash
-source scratch/select_gpu.sh
-python python/sglang/multimodal_gen/test/manual/test_progressive_wan.py \
-    --model-path /path/to/Wan2.1-T2V-1.3B-Diffusers \
-    --steps 50 --delta 0.01 --levels 1 \
-    --output-dir scratch/spectral-progressive-wan/results/
-```
+| Config | Denoise (s) | Total (s) | Transition step | Speedup (denoise) |
+|--------|-------------|-----------|-----------------|-------------------|
+| R1 fullres | 268.9s | 286.0s | — | 1.00× |
+| R2 dct_rewind L1 δ=0.05 | **118.9s** | **135.9s** | 33/50 (σ=0.720→t_eff=0.837) | **2.26×** |
+
+**Token-step theory** predicted **1.98×**; actual is **2.26×**. The gap is because the
+half-resolution steps (0–32) run faster-than-linear: the quadratic attention cost at
+30×52 (= 1,560 tokens) is much less than half the cost at 60×104 (= 6,240 tokens).
+
+**Wall-clock speedup: 2.10× total** (286s → 136s including text encoding + VAE decode).
+
+Videos saved:
+- `results/bench_20260603_170457/R1_fullres.mp4`
+- `results/bench_20260603_170457/R2_prog_L1_d0.05.mp4`
 
 ---
 
