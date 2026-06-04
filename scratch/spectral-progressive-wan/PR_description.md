@@ -200,7 +200,7 @@ Transition steps match the Bayes-optimal criterion exactly for flow\_shift=5.0: 
 δ=**0.05 is the recommended default** (2.32× speedup, visually similar on diverse cinematic scenes).
 
 ## Caveat
-
+Wan 2.1 natively supports 480p and 720p generation, with 480p being the lowest supported resolution. Progressive resolution growing assumes the model can generate at 0.5× the final resolution; however, Wan 2.1 cannot generate 240p videos. Significant degradation in 480p videos is observed when using progressive generation, so it is advised to enable progressive mode only when generating 720p or higher-resolution videos.
 
 ## Checklist
 
