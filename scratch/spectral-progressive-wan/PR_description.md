@@ -138,6 +138,72 @@ Settings: **50 steps**, seed 42, **480×832**, 81 frames, guidance=5.0, flow\_sh
 
 All outputs are artifact-free. Denoising times shown; total wall-clock includes text encoding + VAE decode (~17s each).
 
+### Video quality at 720p — fullres | δ=0.01 | δ=0.05
+
+Settings: **50 steps**, seed 42, **720×1280**, 81 frames, guidance=5.0, flow\_shift=5.0, RTX A6000. Chinese cinematic prompts with negative prompt.
+
+**Prompt:** *"巍峨的雪山山顶，旭日东升，金色阳光穿透云层洒向苍茫大地。山间薄雾缭绕，松涛阵阵，一只雄鹰展翅翱翔于云端之上。航拍镜头缓缓推进，壮丽山河尽收眼底，超写实电影画面。"*
+
+<table>
+<tr>
+  <th align="center">Fullres — 1132.1s</th>
+  <th align="center">δ=0.01 — <b>2.19×</b> — 516.9s</th>
+  <th align="center">δ=0.05 — <b>3.34×</b> — 338.7s</th>
+</tr>
+<tr>
+  <td><img src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/720p/p02_gif/p02_fullres.gif" width="100%"></td>
+  <td><img src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/720p/p02_gif/p02_0.01.gif" width="100%"></td>
+  <td><img src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/720p/p02_gif/p02_0.05.gif" width="100%"></td>
+</tr>
+</table>
+
+**Prompt:** *"辽阔的内蒙古草原上，一群野马奔腾驰骋，扬起滚滚黄尘。夕阳将天空染成橙红色，马蹄声震动大地，鬃毛迎风飞扬。跟踪镜头与马群并驾齐驱，自由与力量交融，超写实史诗级画面。"*
+
+<table>
+<tr>
+  <th align="center">Fullres — 1135.4s</th>
+  <th align="center">δ=0.01 — <b>2.19×</b> — 518.0s</th>
+  <th align="center">δ=0.05 — <b>3.34×</b> — 339.7s</th>
+</tr>
+<tr>
+  <td><img src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/720p/p04_gif/p04_fullres.gif" width="100%"></td>
+  <td><img src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/720p/p04_gif/p04_0.01.gif" width="100%"></td>
+  <td><img src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/720p/p04_gif/p04_0.05.gif" width="100%"></td>
+</tr>
+</table>
+
+**Prompt:** *"热带雨林深处，一道巨大瀑布飞流直下，水雾弥漫，彩虹隐现其间。浓密的绿色植被环绕四周，鸟鸣声此起彼伏，流水声轰鸣震耳。镜头从高处俯冲而下，仿佛置身仙境，电影级写实画面。"*
+
+<table>
+<tr>
+  <th align="center">Fullres — 1133.1s</th>
+  <th align="center">δ=0.01 — <b>2.18×</b> — 517.7s</th>
+  <th align="center">δ=0.05 — <b>3.33×</b> — 339.7s</th>
+</tr>
+<tr>
+  <td><img src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/720p/p05_gif/p05_fullres.gif" width="100%"></td>
+  <td><img src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/720p/p05_gif/p05_0.01.gif" width="100%"></td>
+  <td><img src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/720p/p05_gif/p05_0.05.gif" width="100%"></td>
+</tr>
+</table>
+
+**Prompt:** *"黄昏时分的亚马逊热带雨林，一群蝴蝶在斑驳的光影中翩翩起舞。林间水汽氤氲，光束穿透浓密树冠洒向林地，青蛙在叶片上静静守候。微距镜头细腻捕捉生命之美，色彩浓郁，超写实电影风格。"*
+
+<table>
+<tr>
+  <th align="center">Fullres — 1137.0s</th>
+  <th align="center">δ=0.01 — <b>2.18×</b> — 519.6s</th>
+  <th align="center">δ=0.05 — <b>3.34×</b> — 340.1s</th>
+</tr>
+<tr>
+  <td><img src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/720p/p09_gif/p09_fullres.gif" width="100%"></td>
+  <td><img src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/720p/p09_gif/p09_0.01.gif" width="100%"></td>
+  <td><img src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/720p/p09_gif/p09_0.05.gif" width="100%"></td>
+</tr>
+</table>
+
+All outputs are artifact-free. Denoising times shown; total wall-clock includes text encoding + VAE decode (~35s each).
+
 ### Unit tests (CPU-only, no GPU, ~11 s)
 
 ```bash
@@ -167,7 +233,6 @@ python python/sglang/multimodal_gen/test/manual/test_progressive_wan.py \
 ## Speed Tests and Profiling
 
 Hardware: **RTX A6000 48 GB**, `--dit-cpu-offload false` (transformer GPU-resident).
-All runs: **50 steps**, seed 42, **480×832**, **81 frames**, guidance=5.0, flow\_shift=5.0.
 **Timing = denoising loop only.**
 
 > **Note:** CuTeDSL fused kernels are disabled on this machine (`cutlass.cute` not installed —
@@ -175,7 +240,9 @@ All runs: **50 steps**, seed 42, **480×832**, **81 frames**, guidance=5.0, flow
 > is numerically equivalent. Results are slightly conservative; fused kernels would benefit both
 > fullres and progressive equally and would not change the speedup ratio.
 
-### Pure baseline (fullres vs progressive, no optimizations)
+### Pure baseline (fullres vs progressive, no optimizations) — 480×832
+
+All runs: **50 steps**, seed 42, **480×832**, **81 frames**, guidance=5.0, flow\_shift=5.0.
 
 | Config | Stage split | Denoise | Avg s/step | Speedup | Token-step |
 |--------|------------|---------|-----------|---------|-----------|
@@ -191,11 +258,25 @@ yielding super-linear gains per token saved.
 
 Transition steps match the Bayes-optimal criterion exactly for flow\_shift=5.0: steps 23, 27, 33, 37.
 
+### Pure baseline (fullres vs progressive, no optimizations) — 720×1280
+
+All runs: **50 steps**, seed 42, **720×1280** (auto-aligned to 704×1280), **81 frames**, guidance=5.0, flow\_shift=5.0. Results averaged over 10 Chinese cinematic prompts.
+
+| Config | Stage split | Denoise (avg) | Avg s/step | Speedup | Token-step |
+|--------|------------|--------------|-----------|---------|-----------|
+| fullres | 50 @ 88×160 | 1135.6 s | 22.71 s | 1.00× | 1.00× |
+| dct\_rewind L1 δ=0.01 | 29@44×80 + 21@88×160 | 518.4 s | — | **2.19×** | 1.89× |
+| dct\_rewind L1 δ=0.05 | 38@44×80 + 12@88×160 | 339.7 s | — | **3.34×** | 2.61× |
+
+At 720p the token count quadruples (88×160 = 14,080 vs 44×80 = 3,520), so progressive delivers larger absolute time savings than at 480p — **3.34× denoising speedup at δ=0.05**.
+
+Transition steps match theory exactly for flow\_shift=5.0: steps 29, 38.
+
 ### δ vs speedup tradeoff
 
 ![Speedup vs delta](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/images/speedup_vs_delta.png)
 
-δ=**0.05 is the recommended default** (2.32× speedup, visually similar on diverse cinematic scenes).
+δ=**0.05 is the recommended default** (2.32× at 480p / 3.34× at 720p, visually similar on diverse cinematic scenes).
 
 ## Caveat
 Wan 2.1 natively supports 480p and 720p generation, with 480p being the lowest supported resolution. Progressive resolution growing assumes the model can generate at 0.5× the final resolution; however, Wan 2.1 cannot generate 240p videos. Significant degradation in 480p videos is observed when using progressive generation, so it is advised to enable progressive mode only when generating 720p or higher-resolution videos.
