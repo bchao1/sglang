@@ -206,6 +206,6 @@ on dynamic scenes is pending the quality sweep.
 
 - [x] Format your code according to the [Format code with pre-commit](https://docs.sglang.io/developer_guide/contribution_guide.html#format-code-with-pre-commit).
 - [x] Add unit tests — 26 new CPU-only tests, all pass in ~11 s.
-- [ ] Update documentation — Wan section to be added to `progressive_resolution.mdx`.
+- [x] Update documentation — added Wan T2V section to `progressive_resolution.mdx` (usage, Python API, delta table, benchmark numbers, spatial alignment limitation).
 - [x] Provide accuracy and speed benchmark results — 4-δ sweep table; stage transitions verified against theory; 1.65–2.78× speedup measured.
 - [x] Follow the SGLang code style [guidance](https://docs.sglang.io/developer_guide/contribution_guide.html#code-style-guidance).
