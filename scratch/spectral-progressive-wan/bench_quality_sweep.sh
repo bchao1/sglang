@@ -46,8 +46,10 @@ run_gpu_worker() {
     local gpu_id="$1"
     local -a prompt_indices=("${@:2}")
     export CUDA_VISIBLE_DEVICES="$gpu_id"
+    # Each GPU gets a unique port range to avoid EADDRINUSE collisions
+    local base_port=$((30100 + gpu_id * 10))
 
-    echo "[GPU $gpu_id] Starting: prompts ${prompt_indices[*]}"
+    echo "[GPU $gpu_id] Starting: prompts ${prompt_indices[*]} (base_port=$base_port)"
 
     for pidx in "${prompt_indices[@]}"; do
         local prompt="${PROMPTS[$pidx]}"
@@ -83,6 +85,7 @@ run_gpu_worker() {
                 --guidance-scale "$GUIDANCE_SCALE" \
                 --flow-shift "$FLOW_SHIFT" \
                 --dit-cpu-offload false \
+                --master-port "$base_port" \
                 "${extra_flags[@]}" \
                 > "$logfile" 2>&1
 
