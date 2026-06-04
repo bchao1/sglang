@@ -112,9 +112,6 @@ sglang generate --model-path Wan-AI/Wan2.1-T2V-1.3B-Diffusers \
 | Layerwise CPU offload | ✅ Safe | Component-level, unaffected |
 | LoRA | ✅ Safe | Weight-level |
 | CFG dual-pass | ✅ Safe | Both cond/uncond branches run at whatever H/W |
-| **Sequence parallelism** | ❌ Blocked | Guarded in base class (`RuntimeError` if SP active) |
-| **Cache-Dit** | ❌ Broken | Step cache indexed by step count; T×H×W changes between stages |
-| **torch.compile** | ❌ Broken | Compiled kernel has fixed sequence length |
 
 ## Accuracy Tests
 
