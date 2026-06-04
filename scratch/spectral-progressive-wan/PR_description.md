@@ -115,30 +115,17 @@ sglang generate --model-path Wan-AI/Wan2.1-T2V-1.3B-Diffusers \
 
 ## Accuracy Tests
 
-### Video quality — 10 diverse cinematic prompts: fullres | δ=0.01 | δ=0.02 | δ=0.05
+### Video quality — sample prompt: fullres | δ=0.01 | δ=0.02 | δ=0.05
 
-Settings: **50 steps**, seed 42, **720×1280**, 81 frames, guidance=5.0, flow\_shift=5.0, RTX A6000.
-Labels show denoising-loop time only. All outputs are artifact-free.
+Settings: **50 steps**, seed 42, **480×832**, 81 frames, guidance=5.0, flow\_shift=5.0, RTX A6000.
 
-<!-- PLACEHOLDER: montage / comparison grid of videos once rendered -->
-> 🎬 **Video comparison grid (fullres vs δ=0.01 / δ=0.02 / δ=0.05) — to be added after quality sweep completes**
+**Prompt:** *"A massive thunderstorm rolling across an empty African savanna at dusk, lightning bolts striking the horizon, mammoth cumulonimbus clouds lit from within, photorealistic cinematic"*
 
-<details>
-<summary>Per-prompt 4-way comparison (10 prompts — to be added)</summary>
+| Fullres (266.9s) | δ=0.01 — **1.65×** (161.5s) | δ=0.02 — **1.86×** (142.7s) | δ=0.05 — **2.32×** (114.8s) |
+|:---:|:---:|:---:|:---:|
+| [▶ fullres.mp4](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/p01/p01_fullres.mp4) | [▶ d0.01.mp4](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/p01/p01_0.01.mp4) | [▶ d0.02.mp4](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/p01/p01_0.02.mp4) | [▶ d0.05.mp4](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/p01/p01_0.05.mp4) |
 
-<!-- PLACEHOLDER: individual 4-way side-by-side video strips for each prompt -->
-> p01 — African savanna thunderstorm
-> p02 — Basalt sea cliffs, rogue waves
-> p03 — Active volcano, lava flows
-> p04 — Futuristic megacity rainstorm
-> p05 — Redwood forest at dawn
-> p06 — Cheetah sprint, Serengeti
-> p07 — Aurora borealis, Arctic lake
-> p08 — Gothic cathedral storm
-> p09 — Humpback whales breaching
-> p10 — Steam locomotive, mountain canyon
-
-</details>
+All outputs are artifact-free. Denoising times shown; total wall-clock includes text encoding + VAE decode (~17s each).
 
 ### Unit tests (CPU-only, no GPU, ~11 s)
 
