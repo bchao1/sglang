@@ -129,10 +129,10 @@ Settings: **50 steps**, seed 42, **480×832**, 81 frames, guidance=5.0, flow\_sh
   <th align="center">δ=0.05 — <b>2.27×</b> — 117.8s</th>
 </tr>
 <tr>
-  <td><video src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/p02/p02_fullres.mp4" controls muted width="100%"></video></td>
-  <td><video src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/p02/p02_0.01.mp4" controls muted width="100%"></video></td>
-  <td><video src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/p02/p02_0.02.mp4" controls muted width="100%"></video></td>
-  <td><video src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/p02/p02_0.05.mp4" controls muted width="100%"></video></td>
+  <td><img src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/p02_gif/p02_fullres.gif" width="100%"></td>
+  <td><img src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/p02_gif/p02_0.01.gif" width="100%"></td>
+  <td><img src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/p02_gif/p02_0.02.gif" width="100%"></td>
+  <td><img src="https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/videos/p02_gif/p02_0.05.gif" width="100%"></td>
 </tr>
 </table>
 
