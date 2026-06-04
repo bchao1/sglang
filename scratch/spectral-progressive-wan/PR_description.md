@@ -195,8 +195,7 @@ Transition steps match the Bayes-optimal criterion exactly for flow\_shift=5.0: 
 
 ### δ vs speedup tradeoff
 
-<!-- PLACEHOLDER: speedup_vs_delta.png chart once quality sweep results are in -->
-> 📊 **Speedup-vs-δ curve — to be added after quality sweep completes**
+![Speedup vs delta](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-wan/images/speedup_vs_delta.png)
 
 δ=**0.05 is the recommended default** (2.32× speedup, visually lossless on diverse cinematic scenes).
 δ=0.10 reaches 2.78× but commits 37/50 steps to the half-resolution grid; quality evaluation
