@@ -4,7 +4,7 @@
 
 Transformer attention is O(n²) in sequence length. For Wan 2.1 T2V at 480×832 with 81 frames, the denoising loop processes **6,240 spatial tokens** per step (latent 60×104, 2×2 patch). Running early steps at half spatial resolution (30×52 → 1,560 tokens) reduces attention cost to ~6% for those steps, yielding a **1.65–2.78× denoising speedup** depending on δ — with no quality degradation.
 
-This PR extends **spectral progressive resolution growing** (introduced for FLUX.1 in [PR #26961](https://github.com/sgl-project/sglang/pull/26961)) to the **Wan 2.1 T2V video pipeline**. Early denoising steps run at half the spatial latent resolution; at the transition point the latent is spectrally upsampled via GPU DCT. The temporal dimension T is **never changed** — only H×W grows between stages.
+This PR extends **spectral progressive resolution growing** (introduced for FLUX.1 in [PR #26961](https://github.com/sgl-project/sglang/pull/26961)) to the **Wan 2.1 T2V video pipeline**. Early denoising steps run at half the spatial latent resolution; at the transition point the latent is spectrally upsampled via GPU DCT. The temporal dimension T is **never changed** — only H×W grows between stages. It would be an interesting future direction to also handle temporal progressive generation.
 
 | Model | HuggingFace ID |
 |-------|---------------|
