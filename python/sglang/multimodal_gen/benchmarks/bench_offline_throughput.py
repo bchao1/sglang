@@ -355,9 +355,6 @@ def throughput_test(
         "width": bench_args.width,
         "num_frames": bench_args.num_frames,
         "seed": bench_args.seed,
-        "progressive_mode": bench_args.progressive_mode,
-        "progressive_levels": bench_args.progressive_levels,
-        "progressive_delta": bench_args.progressive_delta,
     }
     if bench_args.disable_safety_checker:
         _sampling_params["safety_checker"] = None
@@ -445,12 +442,6 @@ def display_results(
         f"{bench_args.width}x{bench_args.height}x{bench_args.num_frames}",
     )
     print_value_formatted("Num Inference Steps:", bench_args.num_inference_steps)
-    if bench_args.progressive_mode != "fullres":
-        print_value_formatted(
-            "Progressive Mode:",
-            f"{bench_args.progressive_mode}  levels={bench_args.progressive_levels}"
-            f"  delta={bench_args.progressive_delta}",
-        )
     print_divider(75)
     print_value_formatted("Total Requests:", metrics["num_requests"])
     print_value_formatted("Successful Requests:", metrics["successful_requests"])
@@ -497,9 +488,6 @@ def save_results(
             "num_prompts": bench_args.num_prompts,
             "resolution": f"{bench_args.width}x{bench_args.height}x{bench_args.num_frames}",
             "dataset": bench_args.dataset,
-            "progressive_mode": bench_args.progressive_mode,
-            "progressive_levels": bench_args.progressive_levels,
-            "progressive_delta": bench_args.progressive_delta,
         },
         "results": metrics,
     }
