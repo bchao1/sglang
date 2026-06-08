@@ -353,11 +353,11 @@ python python/sglang/multimodal_gen/test/manual/test_progressive_flux.py
 # FLUX.2
 python python/sglang/multimodal_gen/test/manual/test_progressive_flux2.py
 
+# Z-Image  (always pass --height 1024 --width 1024)
+python python/sglang/multimodal_gen/test/manual/test_progressive_zimage.py
+
 # Wan T2V
 python python/sglang/multimodal_gen/test/manual/test_progressive_wan.py
-
-# Z-Image
-python python/sglang/multimodal_gen/test/manual/test_progressive_zimage.py
 ```
 
 ---
