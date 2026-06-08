@@ -12,9 +12,20 @@ Timing for each config is printed to confirm progressive speedup survives the fi
 """
 
 import os
+import subprocess
 import sys
 import time
 from pathlib import Path
+
+# Pick the GPU with the most free memory.
+_gpu = subprocess.check_output(
+    "nvidia-smi --query-gpu=index,memory.free --format=csv,noheader,nounits"
+    " | awk -F', ' '{ if ($2 > max) { max=$2; idx=$1 } } END { print idx }'",
+    shell=True,
+    text=True,
+).strip()
+os.environ["CUDA_VISIBLE_DEVICES"] = _gpu
+print(f"[select_gpu] CUDA_VISIBLE_DEVICES={_gpu}")
 
 # Point at repo source so editable install picks up the patch.
 sys.path.insert(0, str(Path(__file__).parents[3]))
@@ -23,7 +34,7 @@ os.environ["SGLANG_CACHE_DIT_ENABLED"] = "1"
 
 from sglang.multimodal_gen import DiffGenerator  # noqa: E402
 
-MODEL = "black-forest-labs/FLUX.1-dev"
+MODEL = "/miele/brian/modelscope/black-forest-labs/FLUX.1-dev"
 PROMPT = "A serene mountain lake at golden hour, photorealistic, 8k"
 STEPS = 20
 OUT = Path(__file__).parent / "results" / "cache_dit_smoke"
