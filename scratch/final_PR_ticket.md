@@ -1,4 +1,6 @@
-# Spectral Progressive Resolution Growing — All Models
+# Spectral Progressive Diffusion (FLUX.1, FLUX.2, Qwen-Image, Z-Image, Wan)
+
+> Old PR link: https://github.com/sgl-project/sglang/pull/26961
 
 ## Motivation
 
@@ -17,6 +19,9 @@ Based on [Spectral Progressive Diffusion (arXiv 2605.18736)](https://arxiv.org/a
 | Z-Image 1024×1024 | 4,096 | 1,024 | 4.0× | **2.07×** |
 | Wan 2.1 T2V 480×832/81f | 6,240 | 1,560 | 4.0× | **2.32×** |
 | Qwen-Image 1024×1024 | 1,024 | 256 | 4.0× | **1.29×** |
+
+
+More speedup can be achieved by increasing δ.
 
 ---
 
@@ -69,6 +74,7 @@ All pipelines use the `_[Model]DenoisingStageRouter(PipelineStage)` pattern: a t
 | `configs/sample/sampling_params.py` | +3 fields: `progressive_mode` / `progressive_levels` / `progressive_delta` |
 | `runtime/layers/layernorm.py` | CuTeDSL fused norm: use `_has_cutlass_cute` guard (not try/except) |
 | `runtime/pipelines_core/stages/__init__.py` | Export `ProgressiveDenoisingStage` |
+| `runtime/pipelines_core/stages/progressive_resolution/denoising.py` | Cache-DiT context refresh at each stage transition (see [Cache-DiT](#cache-dit-compatibility)) |
 | `docs_new/docs/sglang-diffusion/progressive_resolution.mdx` | Full usage + benchmark guide |
 | `docs_new/docs.json` | Add to **SGLang Diffusion → Performance Optimization** |
 
@@ -161,7 +167,7 @@ sglang generate \
 
 > **Note:** `--dit-cpu-offload true` is required on 48 GB GPUs. The Qwen-Image transformer occupies ~41 GB; without offloading it to CPU between the denoising and decode stages the VAE decoder OOMs. On GPUs with ≥ 80 GB VRAM `--dit-cpu-offload false` works fine.
 
-For full documentation and more examples, see [`docs_new/docs/sglang-diffusion/progressive_resolution.mdx`](../docs_new/docs/sglang-diffusion/progressive_resolution.mdx).
+For full documentation and more examples, see [`docs_new/docs/sglang-diffusion/progressive_resolution.mdx`](https://github.com/bchao1/sglang/blob/bchao1/spectral-progressive-flux/docs_new/docs/sglang-diffusion/progressive_resolution.mdx).
 
 ---
 
@@ -367,13 +373,74 @@ python python/sglang/multimodal_gen/test/manual/test_progressive_wan.py
 
 ---
 
+## Cache-DiT compatibility
+
+Progressive resolution growing is **natively compatible with Cache-DiT** (`SGLANG_CACHE_DIT_ENABLED=1`). The two optimizations are orthogonal:
+
+- **Progressive** reduces the token count for early denoising steps (4× fewer tokens at coarse resolution → 6% of coarse-stage attention cost).
+- **Cache-DiT** reduces transformer block compute across all steps by reusing residual activations when the frame-to-frame difference is below a threshold.
+
+They compose additively: progressive saves attention FLOPs in the coarse stage; Cache-DiT saves block FLOPs in both stages.
+
+### Why a fix was needed
+
+Cache-DiT wraps the transformer with a `DBCache` context that tracks a step counter and a cached activation tensor. When the latent resolution doubles at the stage transition, the cached activation from the last coarse step has the wrong shape (e.g. `[B, 1024, hidden]` vs the new `[B, 4096, hidden]`). Comparing these would corrupt the residual-diff caching decision for the first full-resolution steps.
+
+The fix: `ProgressiveDenoisingStage.forward()` calls `refresh_context_on_transformer(transformer, n_remaining_steps)` at each stage transition. This resets the step counter to 0 and clears the stale cached activations. The warmup budget (`max_warmup_steps=4`) also restarts — correctly, since the first few full-resolution steps are exactly where guaranteed full compute is most important.
+
+### Usage
+
+Set `SGLANG_CACHE_DIT_ENABLED=1` (or export it) alongside any progressive flags. All other Cache-DiT parameters apply as normal.
+
+```bash
+# FLUX.1-dev: progressive + Cache-DiT (default params)
+SGLANG_CACHE_DIT_ENABLED=1 sglang generate \
+    --model-path black-forest-labs/FLUX.1-dev \
+    --prompt "A serene mountain lake at golden hour, photorealistic" \
+    --num-inference-steps 50 \
+    --dit-cpu-offload false \
+    --progressive-mode dct_rewind \
+    --progressive-levels 1 \
+    --progressive-delta 0.05
+```
+
+The same flag composes with any supported model:
+
+```bash
+# Wan 2.1 T2V: progressive + Cache-DiT
+SGLANG_CACHE_DIT_ENABLED=1 sglang generate \
+    --model-path Wan-AI/Wan2.1-T2V-1.3B-Diffusers \
+    --prompt "A cheetah sprinting across the Serengeti at sunset" \
+    --num-inference-steps 50 \
+    --num-frames 81 --height 480 --width 832 \
+    --guidance-scale 5.0 --flow-shift 5.0 \
+    --dit-cpu-offload false \
+    --progressive-mode dct_rewind \
+    --progressive-levels 1 \
+    --progressive-delta 0.05
+```
+
+### Smoke test
+
+Verified on FLUX.1-dev (RTX A6000, 20 steps, 1024×1024, `torch_sdpa` backend):
+
+| Config | Status |
+|--------|--------|
+| fullres + no Cache-DiT | ✅ pass |
+| fullres + Cache-DiT | ✅ pass |
+| progressive + no Cache-DiT | ✅ pass |
+| **progressive + Cache-DiT** | ✅ pass |
+
+Log confirms `cache-dit context refreshed at stage transition (step 12, 8 steps remaining)` fires at the coarse→full-res boundary for the progressive+Cache-DiT config and is absent (correctly) for the other three.
+
+---
+
 ## Limitations
 
-- **Sequence parallelism incompatible.** Cannot be combined with `--ulysses-degree` or `--ring-degree`. The stage raises a `RuntimeError` if SP is enabled.
-- **torch.compile incompatible.** Compiled kernels have a fixed sequence length; the resolution transition causes a recompile or error.
-- **Cache-DiT incompatible.** Cache-DiT indexes its step cache by step count; the stage transition resets the index.
 - **Wan: spatial-only.** Progressive growing applies to H×W only. The temporal dimension T (number of latent frames) is kept fixed across all stages.
 - **Qwen-Image: OOM risk.** At default settings, the VAE decode step may OOM on a 48GB A6000. DiT offload (`--dit-cpu-offload`) frees memory for decode at the cost of PCIe transfer per step.
+- **Sequence parallelism incompatible.** Cannot be combined with `--ulysses-degree` or `--ring-degree`. SP shards the sequence dimension at fixed granularity; the 4× token-count change at the stage transition cannot be absorbed without re-initializing the distributed process groups.
+- **torch.compile incompatible.** Compiled kernels have a fixed sequence length; the resolution transition causes a recompile or error.
 
 ## References
 
@@ -389,3 +456,27 @@ python python/sglang/multimodal_gen/test/manual/test_progressive_wan.py
 - [x] Update documentation according to [Write documentations](https://docs.sglang.io/developer_guide/contribution_guide.html#write-documentations). — Added `docs_new/docs/sglang-diffusion/progressive_resolution.mdx` with usage guide for all 5 models, added to `docs_new/docs.json` under **SGLang Diffusion → Performance Optimization**.
 - [x] Provide accuracy and speed benchmark results according to [Test the accuracy](https://docs.sglang.io/developer_guide/contribution_guide.html#test-the-accuracy) and [Benchmark the speed](https://docs.sglang.io/developer_guide/contribution_guide.html#benchmark-the-speed). — Denoising speedup tables for all 5 models + visual quality comparisons above; combined speedup-vs-δ plot included.
 - [x] Follow the SGLang code style [guidance](https://docs.sglang.io/developer_guide/contribution_guide.html#code-style-guidance). — import ordering, no unused imports, pure functions, no `.item()`/`.cpu()` on hot path, cached boolean checks in `__init__`.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- pr-states:start -->
+---
+### CI States
+
+Latest PR Test (Base): <!-- slot:pr-test:start -->:x: [Run #27114779074](https://github.com/sgl-project/sglang/actions/runs/27114779074)<!-- slot:pr-test:end -->
+Latest PR Test (Extra): <!-- slot:pr-test-extra:start -->:x: [Run #27114778979](https://github.com/sgl-project/sglang/actions/runs/27114778979)<!-- slot:pr-test-extra:end -->
+<!-- pr-states:end -->
