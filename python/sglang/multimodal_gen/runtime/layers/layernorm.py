@@ -28,6 +28,14 @@ from sglang.multimodal_gen.runtime.platforms import current_platform
 from sglang.multimodal_gen.runtime.utils.common import get_bool_env_var
 
 _is_cuda = current_platform.is_cuda()
+
+# CuTeDSL fused kernels require cutlass.cute (CUTLASS 3.x Python bindings).
+try:
+    import cutlass.cute as _  # noqa: F401
+
+    _has_cutlass_cute = True
+except Exception:
+    _has_cutlass_cute = False
 _is_hip = current_platform.is_hip()
 _is_npu = current_platform.is_npu()
 _is_musa = current_platform.is_musa()
@@ -476,7 +484,7 @@ class _ScaleResidualNormScaleShift(CustomOp):
         if residual.numel() == 0 or x.numel() == 0:
             return self.forward_native(residual, x, gate, shift, scale)
 
-        if x.shape[-1] % 256 != 0 and x.shape[-1] <= 8192:
+        if not _has_cutlass_cute or (x.shape[-1] % 256 != 0 and x.shape[-1] <= 8192):
             import warnings
 
             warnings.warn(
@@ -485,9 +493,12 @@ class _ScaleResidualNormScaleShift(CustomOp):
             )
             return self.forward_native(residual, x, gate, shift, scale)
 
-        from sglang.jit_kernel.diffusion.cutedsl.scale_residual_norm_scale_shift import (
-            fused_scale_residual_norm_scale_shift,
-        )
+        try:
+            from sglang.jit_kernel.diffusion.cutedsl.scale_residual_norm_scale_shift import (
+                fused_scale_residual_norm_scale_shift,
+            )
+        except Exception:
+            return self.forward_native(residual, x, gate, shift, scale)
 
         if isinstance(gate, int) and gate != 1:
             raise ValueError(
@@ -625,7 +636,7 @@ class _NormScaleShift(CustomOp):
     def forward_cuda(
         self, x: torch.Tensor, shift: torch.Tensor, scale: torch.Tensor
     ) -> torch.Tensor:
-        if x.shape[-1] % 256 != 0 and x.shape[-1] <= 8192:
+        if not _has_cutlass_cute or (x.shape[-1] % 256 != 0 and x.shape[-1] <= 8192):
             import warnings
 
             warnings.warn(
@@ -634,9 +645,12 @@ class _NormScaleShift(CustomOp):
             )
             return self.forward_native(x, shift, scale)
 
-        from sglang.jit_kernel.diffusion.cutedsl.scale_residual_norm_scale_shift import (
-            fused_norm_scale_shift,
-        )
+        try:
+            from sglang.jit_kernel.diffusion.cutedsl.scale_residual_norm_scale_shift import (
+                fused_norm_scale_shift,
+            )
+        except Exception:
+            return self.forward_native(x, shift, scale)
 
         return fused_norm_scale_shift(
             x.contiguous(),
@@ -718,7 +732,7 @@ class _NormTanhMulAdd(CustomOp):
     def forward_cuda(
         self, x: torch.Tensor, scale: torch.Tensor, shift: torch.Tensor
     ) -> torch.Tensor:
-        if x.shape[-1] % 256 != 0 and x.shape[-1] <= 8192:
+        if not _has_cutlass_cute or (x.shape[-1] % 256 != 0 and x.shape[-1] <= 8192):
             import warnings
 
             warnings.warn(
@@ -727,9 +741,12 @@ class _NormTanhMulAdd(CustomOp):
             )
             return self.forward_native(x, scale, shift)
 
-        from sglang.jit_kernel.diffusion.cutedsl.norm_tanh_mul_add_norm_scale import (
-            fused_norm_tanh_mul_add,
-        )
+        try:
+            from sglang.jit_kernel.diffusion.cutedsl.norm_tanh_mul_add_norm_scale import (
+                fused_norm_tanh_mul_add,
+            )
+        except Exception:
+            return self.forward_native(x, scale, shift)
 
         x, scale, shift = x.contiguous(), scale.contiguous(), shift.contiguous()
         weight = _ensure_contiguous(getattr(self.norm, "weight", None))
@@ -869,15 +886,27 @@ def apply_qk_norm_rope(
         raise ValueError(
             f"apply_qk_norm_rope expects 4D q/k tensors, got q:{tuple(q.shape)} k:{tuple(k.shape)}"
         )
-    if q.shape != k.shape:
+    if q.shape[:2] != k.shape[:2] or q.shape[-1] != k.shape[-1]:
         raise ValueError(
-            f"apply_qk_norm_rope expects q/k to have the same shape, got {q.shape} vs {k.shape}"
+            "apply_qk_norm_rope expects q/k to share batch, sequence, and head size, "
+            f"got {q.shape} vs {k.shape}"
+        )
+    if not (isinstance(cos_sin_cache, torch.Tensor) and cos_sin_cache.dim() == 2):
+        raise ValueError("cos_sin_cache must be a 2D torch.Tensor")
+    if k.device != q.device or cos_sin_cache.device != q.device:
+        raise ValueError(
+            "q, k, and cos_sin_cache must be on the same device, "
+            f"got q={q.device}, k={k.device}, cos_sin_cache={cos_sin_cache.device}"
         )
 
     batch_size, seq_len, _, _ = q.shape
     q_eps = q_norm.variance_epsilon
     k_eps = k_norm.variance_epsilon
     rope_dim = cos_sin_cache.size(-1)
+    if rope_dim % 2 != 0 or rope_dim > head_dim:
+        raise ValueError(
+            f"cos_sin_cache width must be even and <= head_dim, got {rope_dim} vs {head_dim}"
+        )
     fused_enabled = os.getenv("SGLANG_ENABLE_FUSED_QKNORM_ROPE", "1").lower() not in {
         "0",
         "false",
@@ -898,6 +927,7 @@ def apply_qk_norm_rope(
             raise ValueError(
                 f"positions must be 1D of length {batch_size * seq_len}, got shape={tuple(positions.shape)}"
             )
+        positions = positions.to(device=q.device, dtype=torch.long)
 
     if (
         fused_enabled
@@ -953,7 +983,13 @@ def apply_rmsnorm_tanh_mul_add(
     if get_bool_env_var("SGLANG_ENABLE_DETERMINISTIC_INFERENCE"):
         return residual + torch.tanh(gate) * norm(x)
 
-    if _is_cuda and x.is_cuda and x.shape[-1] % 256 == 0 and x.shape[-1] <= 8192:
+    if (
+        _is_cuda
+        and _has_cutlass_cute
+        and x.is_cuda
+        and x.shape[-1] % 256 == 0
+        and x.shape[-1] <= 8192
+    ):
         from sglang.jit_kernel.diffusion.cutedsl.norm_tanh_mul_add_norm_scale import (
             fused_norm_tanh_mul_add,
         )
