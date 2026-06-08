@@ -1,0 +1,17 @@
+# Smoke test timings — Sun Jun  7 06:46:12 PM PDT 2026
+# GPU: NVIDIA RTX A6000
+label,wall_secs
+flux1_fullres,320.39
+flux1_dct_rewind_d0.05,109.93
+flux2_fullres,204.20
+flux2_dct_rewind_d0.05,60.73
+zimage_fullres,252.90
+zimage_dct_rewind_d0.05,47.02
+wan_fullres,604.02
+wan_dct_rewind_d0.05,111.62
+qwen_fullres,292.52
+zimage_fullres_1024,188.03
+qwen_dct_rewind_d0.05,75.65
+zimage_dct_rewind_d0.05_1024,72.68
+qwen_fullres_512,138.13
+qwen_dct_rewind_d0.05_512,131.51

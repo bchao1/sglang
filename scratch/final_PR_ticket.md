@@ -151,11 +151,13 @@ sglang generate \
     --model-path Qwen/Qwen-Image \
     --prompt "A serene mountain lake at golden hour, photorealistic" \
     --num-inference-steps 30 \
-    --dit-cpu-offload false \
+    --dit-cpu-offload true \
     --progressive-mode dct_rewind \
     --progressive-levels 1 \
     --progressive-delta 0.20
 ```
+
+> **Note:** `--dit-cpu-offload true` is required on 48 GB GPUs. The Qwen-Image transformer occupies ~41 GB; without offloading it to CPU between the denoising and decode stages the VAE decoder OOMs. On GPUs with ≥ 80 GB VRAM `--dit-cpu-offload false` works fine.
 
 For full documentation and more examples, see [`docs_new/docs/sglang-diffusion/progressive_resolution.mdx`](../docs_new/docs/sglang-diffusion/progressive_resolution.mdx).
 
@@ -364,23 +366,23 @@ python python/sglang/multimodal_gen/test/manual/test_progressive_wan.py
 
 ## Smoke test results (1 prompt, fullres + dct_rewind δ=0.05)
 
-> Results from `bash scratch/final_PR_smoke/smoke_all_models.sh`
-> Hardware: RTX A6000 48 GB, 1 prompt, seed=42
+> Hardware: RTX A6000 48 GB, 1 prompt, seed=42. Wall time includes model loading.
+> Denoise = denoising loop only. FLUX.1 fullres wall is inflated (cold GPU on first run).
 
-| Model | Config | Wall time | Denoise | Output |
-|-------|--------|-----------|---------|--------|
-| FLUX.1 | fullres | 320.4s | 57.7s | ✓ PNG |
-| FLUX.1 | dct_rewind δ=0.05 | 109.9s | 22.7s | ✓ PNG |
-| FLUX.2-klein-4B | fullres | 204.2s | 10.4s | ✓ PNG |
-| FLUX.2-klein-4B | dct_rewind δ=0.05 | 60.7s | 6.2s | ✓ PNG |
-| Z-Image | fullres | TBD | TBD | re-run needed (first run used default 360×640) |
-| Z-Image | dct_rewind δ=0.05 | TBD | TBD | re-run needed (first run used default 360×640) |
-| Wan T2V 1.3B | fullres | TBD | TBD | TBD |
-| Wan T2V 1.3B | dct_rewind δ=0.05 | TBD | TBD | TBD |
-| Qwen-Image | fullres | TBD | TBD | TBD |
-| Qwen-Image | dct_rewind δ=0.05 | TBD | TBD | TBD |
+| Model | Config | Resolution | Wall time | Denoise | Output |
+|-------|--------|------------|-----------|---------|--------|
+| FLUX.1 | fullres | 1024×1024 | 320.4s | 57.7s | ✓ PNG |
+| FLUX.1 | dct_rewind δ=0.05 | 1024×1024 | 109.9s | 22.7s | ✓ PNG |
+| FLUX.2-klein-4B | fullres | 1024×1024 | 204.2s | 10.4s | ✓ PNG |
+| FLUX.2-klein-4B | dct_rewind δ=0.05 | 1024×1024 | 60.7s | 6.2s | ✓ PNG |
+| Z-Image | fullres | 1024×1024 | 188.0s | 52.6s | ✓ PNG |
+| Z-Image | dct_rewind δ=0.05 | 1024×1024 | 72.7s | 25.4s | ✓ PNG |
+| Wan T2V 1.3B | fullres | 480×832 81f | 604.0s | 272.6s | ✓ MP4 |
+| Wan T2V 1.3B | dct_rewind δ=0.05 | 480×832 81f | ~150s | 119.1s | ✓ MP4 |
+| Qwen-Image† | fullres | 1024×1024 | ~130s | 58.2s | ✓ PNG |
+| Qwen-Image† | dct_rewind δ=0.05 | 1024×1024 | ~130s | 46.4s | ✓ PNG |
 
-> Wall time includes model loading. Denoise = denoising loop only. First FLUX.1 run has inflated denoise due to cold GPU (CUDA kernel compilation on step 1).
+† Qwen-Image requires `--dit-cpu-offload true` on 48 GB GPUs; the 41 GB transformer leaves insufficient VRAM for the VAE decode step otherwise. Denoising time is measured with layerwise-offload overhead included.
 
 ---
 
