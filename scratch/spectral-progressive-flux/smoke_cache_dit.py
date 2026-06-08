@@ -31,8 +31,6 @@ print(f"[select_gpu] CUDA_VISIBLE_DEVICES={_gpu}")
 sys.path.insert(0, str(Path(__file__).parents[3]))
 
 os.environ["SGLANG_CACHE_DIT_ENABLED"] = "1"
-# FA3 requires Hopper (H100+); A6000 is Ampere — force FA2.
-os.environ.setdefault("SGLANG_DIFFUSION_ATTENTION_BACKEND", "flash_attn2")
 
 from sglang.multimodal_gen import DiffGenerator  # noqa: E402
 
@@ -120,6 +118,7 @@ def main():
     gen = DiffGenerator.from_pretrained(
         model_path=MODEL,
         dit_cpu_offload=False,
+        attention_backend="torch_sdpa",
     )
 
     timings = {}
