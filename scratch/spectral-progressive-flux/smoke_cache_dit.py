@@ -31,6 +31,8 @@ print(f"[select_gpu] CUDA_VISIBLE_DEVICES={_gpu}")
 sys.path.insert(0, str(Path(__file__).parents[3]))
 
 os.environ["SGLANG_CACHE_DIT_ENABLED"] = "1"
+# FA3 requires Hopper (H100+); A6000 is Ampere — force FA2.
+os.environ.setdefault("SGLANG_DIFFUSION_ATTENTION_BACKEND", "flash_attn2")
 
 from sglang.multimodal_gen import DiffGenerator  # noqa: E402
 
@@ -95,12 +97,18 @@ def run_config(gen: DiffGenerator, cfg: dict) -> float:
     )
     elapsed = time.time() - t0
 
-    # Save image
-    img = result.images[0] if hasattr(result, "images") else result
-    if hasattr(img, "save"):
-        out_path = OUT / f"{label}.png"
-        img.save(out_path)
-        print(f"  Saved: {out_path}")
+    # DiffGenerator swallows generation errors internally; detect failure via
+    # missing images rather than relying on an exception propagating.
+    images = getattr(result, "images", None)
+    if not images:
+        raise RuntimeError(
+            f"Generation returned no images (elapsed {elapsed:.2f}s) — "
+            "check logs above for the underlying error."
+        )
+    img = images[0]
+    out_path = OUT / f"{label}.png"
+    img.save(out_path)
+    print(f"  Saved: {out_path}")
     print(f"  Wall time: {elapsed:.2f}s")
     return elapsed
 
