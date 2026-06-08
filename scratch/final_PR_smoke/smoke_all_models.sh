@@ -121,6 +121,7 @@ run_gen "zimage_fullres" "png" \
     --prompt "$PROMPT" \
     --attention-backend torch_sdpa \
     --num-inference-steps "$IMAGE_STEPS" \
+    --height 1024 --width 1024 \
     --dit-cpu-offload false
 
 run_gen "zimage_dct_rewind_d0.05" "png" \
@@ -128,6 +129,7 @@ run_gen "zimage_dct_rewind_d0.05" "png" \
     --prompt "$PROMPT" \
     --attention-backend torch_sdpa \
     --num-inference-steps "$IMAGE_STEPS" \
+    --height 1024 --width 1024 \
     --dit-cpu-offload false \
     --progressive-mode dct_rewind \
     --progressive-levels 1 \
@@ -179,6 +181,7 @@ run_gen "qwen_fullres" "png" \
     --prompt "$PROMPT" \
     --attention-backend torch_sdpa \
     --num-inference-steps "$QWEN_STEPS" \
+    --height 1024 --width 1024 \
     --dit-cpu-offload false
 
 run_gen "qwen_dct_rewind_d0.05" "png" \
@@ -186,6 +189,7 @@ run_gen "qwen_dct_rewind_d0.05" "png" \
     --prompt "$PROMPT" \
     --attention-backend torch_sdpa \
     --num-inference-steps "$QWEN_STEPS" \
+    --height 1024 --width 1024 \
     --dit-cpu-offload false \
     --progressive-mode dct_rewind \
     --progressive-levels 1 \

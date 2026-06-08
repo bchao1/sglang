@@ -373,8 +373,8 @@ python python/sglang/multimodal_gen/test/manual/test_progressive_zimage.py
 | FLUX.1 | dct_rewind δ=0.05 | 109.9s | 22.7s | ✓ PNG |
 | FLUX.2-klein-4B | fullres | 204.2s | 10.4s | ✓ PNG |
 | FLUX.2-klein-4B | dct_rewind δ=0.05 | 60.7s | 6.2s | ✓ PNG |
-| Z-Image | fullres | TBD | TBD | TBD |
-| Z-Image | dct_rewind δ=0.05 | TBD | TBD | TBD |
+| Z-Image | fullres | TBD | TBD | re-run needed (first run used default 360×640) |
+| Z-Image | dct_rewind δ=0.05 | TBD | TBD | re-run needed (first run used default 360×640) |
 | Wan T2V 1.3B | fullres | TBD | TBD | TBD |
 | Wan T2V 1.3B | dct_rewind δ=0.05 | TBD | TBD | TBD |
 | Qwen-Image | fullres | TBD | TBD | TBD |
