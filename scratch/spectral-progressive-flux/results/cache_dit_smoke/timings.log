@@ -1,0 +1,6 @@
+# Cache-DiT smoke test — Sun Jun  7 09:12:22 PM PDT 2026
+label,wall_secs
+fullres_no_cache,76.76
+fullres_cache_dit,71.30
+progressive_no_cache,71.35
+progressive_cache_dit,68.17
