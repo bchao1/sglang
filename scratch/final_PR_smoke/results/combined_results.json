@@ -1,0 +1,57 @@
+{
+  "FLUX.1-dev": {
+    "steps": 50,
+    "fullres_denoise_s": 36.43,
+    "points": [
+      {"delta": 0.01, "denoise_s": 27.43, "speedup": 1.3281},
+      {"delta": 0.02, "denoise_s": 25.51, "speedup": 1.4281},
+      {"delta": 0.05, "denoise_s": 22.49, "speedup": 1.6198},
+      {"delta": 0.1, "denoise_s": 19.95, "speedup": 1.8261},
+      {"delta": 0.2, "denoise_s": 17.90, "speedup": 2.0352}
+    ]
+  },
+  "FLUX.2-klein-4B": {
+    "steps": 50,
+    "fullres_denoise_s": 16.55,
+    "points": [
+      {"delta": 0.01, "denoise_s": 12.39, "speedup": 1.3358},
+      {"delta": 0.02, "denoise_s": 11.43, "speedup": 1.4479},
+      {"delta": 0.05, "denoise_s": 10.05, "speedup": 1.6468},
+      {"delta": 0.1, "denoise_s": 9.03, "speedup": 1.8328},
+      {"delta": 0.2, "denoise_s": 8.08, "speedup": 2.0483}
+    ]
+  },
+  "Z-Image": {
+    "steps": 50,
+    "fullres_denoise_s": 53.23,
+    "points": [
+      {"delta": 0.01, "denoise_s": 33.23, "speedup": 1.6019},
+      {"delta": 0.02, "denoise_s": 30.58, "speedup": 1.7407},
+      {"delta": 0.05, "denoise_s": 26.81, "speedup": 1.9855},
+      {"delta": 0.1, "denoise_s": 23.80, "speedup": 2.2366},
+      {"delta": 0.2, "denoise_s": 21.49, "speedup": 2.4770}
+    ]
+  },
+  "Wan 2.1 T2V 1.3B": {
+    "steps": 50,
+    "fullres_denoise_s": 261.48,
+    "points": [
+      {"delta": 0.01, "denoise_s": 156.44, "speedup": 1.6714},
+      {"delta": 0.02, "denoise_s": 138.23, "speedup": 1.8916},
+      {"delta": 0.05, "denoise_s": 110.79, "speedup": 2.3601},
+      {"delta": 0.1, "denoise_s": 92.62, "speedup": 2.8231},
+      {"delta": 0.2, "denoise_s": 79.80, "speedup": 3.2767}
+    ]
+  },
+  "Qwen-Image": {
+    "steps": 50,
+    "fullres_denoise_s": 72.03,
+    "points": [
+      {"delta": 0.01, "denoise_s": 58.55, "speedup": 1.2302},
+      {"delta": 0.02, "denoise_s": 54.94, "speedup": 1.3111},
+      {"delta": 0.05, "denoise_s": 50.23, "speedup": 1.4340},
+      {"delta": 0.1, "denoise_s": 44.95, "speedup": 1.6024},
+      {"delta": 0.2, "denoise_s": 41.46, "speedup": 1.7373}
+    ]
+  }
+}
