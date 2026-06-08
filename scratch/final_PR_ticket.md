@@ -304,22 +304,12 @@ Prompt: *"Giant rogue waves crashing against sheer basalt sea cliffs at golden h
 ### Qwen-Image
 
 <details>
-<summary>Fullres | δ=0.05 | δ=0.20 — 10 diverse prompts</summary>
+<summary>Speedup vs δ curve and quality comparison</summary>
 
-![Qwen-Image 3-way montage](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-qwen/pr_visuals/montage_preview.png)
+![Qwen-Image speedup vs delta](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-qwen/pr_visuals/speedup_vs_delta.png)
 
-Per-prompt 3-way comparison strips (fullres | δ=0.05 | δ=0.20):
-
-![00 landscape](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-qwen/pr_visuals/3way/00_landscape_3way.png)
-![01 architecture](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-qwen/pr_visuals/3way/01_architecture_3way.png)
-![02 portrait](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-qwen/pr_visuals/3way/02_portrait_3way.png)
-![03 cityscape](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-qwen/pr_visuals/3way/03_cityscape_3way.png)
-![04 object](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-qwen/pr_visuals/3way/04_object_3way.png)
-![05 wildlife](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-qwen/pr_visuals/3way/05_wildlife_3way.png)
-![06 interior](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-qwen/pr_visuals/3way/06_interior_3way.png)
-![07 seascape](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-qwen/pr_visuals/3way/07_seascape_3way.png)
-![08 desert](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-qwen/pr_visuals/3way/08_desert_3way.png)
-![09 fantasy](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-qwen/pr_visuals/3way/09_fantasy_3way.png)
+> 3-way comparison images (fullres | δ=0.05 | δ=0.20) can be generated with
+> `python scratch/spectral-progressive-qwen/gen_3way_comparison_qwen.py`
 
 </details>
 
