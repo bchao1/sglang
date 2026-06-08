@@ -2,23 +2,25 @@
 
 ## Motivation
 
-Transformer attention is O(n²) in sequence length. For image/video diffusion models running at full resolution, early denoising steps waste compute on high-frequency detail that has not yet been activated. **Spectral progressive resolution growing** runs those early steps at half the spatial resolution, then spectrally upsamples the latent before the full-resolution steps.
+Transformer attention is O(n²) in sequence length. For image/video diffusion models, early denoising steps operate almost entirely in the low-frequency regime — high-frequency spatial detail has not yet been activated by the diffusion process. Spending full-resolution compute on these steps is pure waste.
 
-The upsample step is **Bayes-optimal**: using the measured VAE latent power spectrum, it computes the exact denoising step at which Nyquist-band frequencies first carry more signal than noise. This means the speedup is lossless by construction — not a quality-speed tradeoff.
+**Spectral progressive resolution growing** runs early steps at a coarser spatial resolution, then spectrally upsamples the latent to full resolution for the steps where fine detail matters. The upsample is **Bayes-optimal**: we measure the empirical power spectrum of VAE latents for each model and compute the exact noise level at which Nyquist-band frequencies first carry more signal than noise. The stage transition is automatic — no hand-tuned schedules. This makes the speedup **lossless by construction**, not a quality-speed tradeoff.
 
-| Model | Full-res tokens | Half-res tokens | Token ratio | Best speedup (δ=0.05) |
-|-------|----------------|----------------|------------|----------------------|
-| FLUX.1 1024×1024 | 4,096 | 1,024 | 4.0× | **1.63×** |
-| FLUX.2 1024×1024 | 4,096 | 1,024 | 4.0× | **1.77×** |
+Based on [Spectral Progressive Diffusion (arXiv 2605.18736)](https://arxiv.org/abs/2605.18736). This is the first GPU-native spectral progressive implementation in an open LLM/diffusion serving framework.
+
+**Speedup summary** (RTX A6000 48 GB, denoising loop only, δ=0.05):
+
+| Model | Full-res tokens | Half-res tokens | Token ratio | Speedup at δ=0.05 |
+|-------|----------------|----------------|------------|-------------------|
+| FLUX.1-dev 1024×1024 | 4,096 | 1,024 | 4.0× | **1.63×** |
+| FLUX.2-klein-4B 1024×1024 | 4,096 | 1,024 | 4.0× | **1.77×** |
 | Z-Image 1024×1024 | 4,096 | 1,024 | 4.0× | **2.07×** |
 | Wan 2.1 T2V 480×832/81f | 6,240 | 1,560 | 4.0× | **2.32×** |
 | Qwen-Image 1024×1024 | 1,024 | 256 | 4.0× | **1.29×** |
 
-Based on [Spectral Progressive Diffusion (arXiv 2605.18736)](https://arxiv.org/abs/2605.18736). This is the first GPU-native spectral progressive implementation in an open LLM/diffusion serving framework.
-
 ---
 
-## What changed
+## Modifications
 
 ### New core module — `runtime/pipelines_core/stages/progressive_resolution/`
 
@@ -398,3 +400,20 @@ python python/sglang/multimodal_gen/test/manual/test_progressive_wan.py
 
 - [Spectral Progressive Diffusion (arXiv 2605.18736)](https://arxiv.org/abs/2605.18736)
 - [SGLang documentation](docs_new/docs/sglang-diffusion/progressive_resolution.mdx)
+
+---
+
+## Checklist
+
+- [x] Format your code according to the [Format code with pre-commit](https://docs.sglang.io/developer_guide/contribution_guide.html#format-code-with-pre-commit). — `pre-commit run --all-files` passes on the branch (black, isort, ruff, trailing whitespace, codespell).
+- [x] Add unit tests according to the [Run and add unit tests](https://docs.sglang.io/developer_guide/contribution_guide.html#run-and-add-unit-tests). — 119 CPU-only unit tests in `test/unit/test_progressive.py`; all pass. Covers DCT math, upsample, scheduler utils, and all 5 model-specific stages.
+- [x] Update documentation according to [Write documentations](https://docs.sglang.io/developer_guide/contribution_guide.html#write-documentations). — Added `docs_new/docs/sglang-diffusion/progressive_resolution.mdx` with usage guide for all 5 models, added to `docs_new/docs.json` under **SGLang Diffusion → Performance Optimization**.
+- [x] Provide accuracy and speed benchmark results according to [Test the accuracy](https://docs.sglang.io/developer_guide/contribution_guide.html#test-the-accuracy) and [Benchmark the speed](https://docs.sglang.io/developer_guide/contribution_guide.html#benchmark-the-speed). — Denoising speedup tables for all 5 models + visual quality comparisons above; combined speedup-vs-δ plot included.
+- [x] Follow the SGLang code style [guidance](https://docs.sglang.io/developer_guide/contribution_guide.html#code-style-guidance). — import ordering, no unused imports, pure functions, no `.item()`/`.cpu()` on hot path, cached boolean checks in `__init__`.
+
+## Review and Merge Process
+
+1. Ping Merge Oncalls to start the process. See the [PR Merge Process](https://github.com/sgl-project/sglang/blob/main/.github/MAINTAINER.md#pull-request-merge-process).
+2. Get approvals from [CODEOWNERS](https://github.com/sgl-project/sglang/blob/main/.github/CODEOWNERS) and other reviewers.
+3. Trigger CI tests with `/tag-and-rerun-ci` comment (author does not have write access to trigger CI directly).
+4. After green CI and required approvals, ask Merge Oncalls or people with Write permission to merge the PR.
