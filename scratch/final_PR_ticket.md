@@ -4,7 +4,7 @@
 
 Transformer attention is O(n²) in sequence length. For image/video diffusion models, early denoising steps operate almost entirely in the low-frequency regime — high-frequency spatial detail has not yet been activated by the diffusion process. Spending full-resolution compute on these steps is pure waste.
 
-**Spectral progressive resolution growing** runs early steps at a coarser spatial resolution, then spectrally upsamples the latent to full resolution for the steps where fine detail matters. The upsample is **Bayes-optimal**: we measure the empirical power spectrum of VAE latents for each model and compute the exact noise level at which Nyquist-band frequencies first carry more signal than noise. The stage transition is automatic — no hand-tuned schedules. This makes the speedup **lossless by construction**, not a quality-speed tradeoff.
+**Spectral progressive resolution growing** runs early steps at a coarser spatial resolution, then spectrally upsamples the latent to full resolution for the steps where fine detail matters. The upsample is **Bayes-optimal**: we measure the empirical power spectrum of VAE latents for each model and compute the exact noise level at which Nyquist-band frequencies first carry more signal than noise.
 
 Based on [Spectral Progressive Diffusion (arXiv 2605.18736)](https://arxiv.org/abs/2605.18736). This is the first GPU-native spectral progressive implementation in an open LLM/diffusion serving framework.
 
@@ -308,12 +308,13 @@ Prompt: *"Giant rogue waves crashing against sheer basalt sea cliffs at golden h
 ### Qwen-Image
 
 <details>
-<summary>Speedup vs δ curve and quality comparison</summary>
+<summary>Fullres vs dct_rewind δ=0.20 — smoke test (512×512, --dit-cpu-offload true)</summary>
 
-![Qwen-Image speedup vs delta](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-qwen/pr_visuals/speedup_vs_delta.png)
+Prompt: *"A serene mountain lake at golden hour, photorealistic"*
 
-> 3-way comparison images (fullres | δ=0.05 | δ=0.20) can be generated with
-> `python scratch/spectral-progressive-qwen/gen_3way_comparison_qwen.py`
+| fullres | dct_rewind δ=0.20 |
+|---------|-------------------|
+| ![Qwen fullres](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/final_PR_smoke/results/qwen_fullres_cpuoffload.png) | ![Qwen dct_rewind](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/final_PR_smoke/results/qwen_dct_rewind_d0.05_cpuoffload.png) |
 
 </details>
 
@@ -366,28 +367,6 @@ python python/sglang/multimodal_gen/test/manual/test_progressive_wan.py
 
 ---
 
-## Smoke test results (1 prompt, fullres + dct_rewind δ=0.05)
-
-> Hardware: RTX A6000 48 GB, 1 prompt, seed=42. Wall time includes model loading.
-> Denoise = denoising loop only. FLUX.1 fullres wall is inflated (cold GPU on first run).
-
-| Model | Config | Resolution | Wall time | Denoise | Output |
-|-------|--------|------------|-----------|---------|--------|
-| FLUX.1 | fullres | 1024×1024 | 320.4s | 57.7s | ✓ PNG |
-| FLUX.1 | dct_rewind δ=0.05 | 1024×1024 | 109.9s | 22.7s | ✓ PNG |
-| FLUX.2-klein-4B | fullres | 1024×1024 | 204.2s | 10.4s | ✓ PNG |
-| FLUX.2-klein-4B | dct_rewind δ=0.05 | 1024×1024 | 60.7s | 6.2s | ✓ PNG |
-| Z-Image | fullres | 1024×1024 | 188.0s | 52.6s | ✓ PNG |
-| Z-Image | dct_rewind δ=0.05 | 1024×1024 | 72.7s | 25.4s | ✓ PNG |
-| Wan T2V 1.3B | fullres | 480×832 81f | 604.0s | 272.6s | ✓ MP4 |
-| Wan T2V 1.3B | dct_rewind δ=0.05 | 480×832 81f | ~150s | 119.1s | ✓ MP4 |
-| Qwen-Image† | fullres | 1024×1024 | ~130s | 58.2s | ✓ PNG |
-| Qwen-Image† | dct_rewind δ=0.05 | 1024×1024 | ~130s | 46.4s | ✓ PNG |
-
-† Qwen-Image requires `--dit-cpu-offload true` on 48 GB GPUs; the 41 GB transformer leaves insufficient VRAM for the VAE decode step otherwise. Denoising time is measured with layerwise-offload overhead included.
-
----
-
 ## Limitations
 
 - **Sequence parallelism incompatible.** Cannot be combined with `--ulysses-degree` or `--ring-degree`. The stage raises a `RuntimeError` if SP is enabled.
@@ -410,10 +389,3 @@ python python/sglang/multimodal_gen/test/manual/test_progressive_wan.py
 - [x] Update documentation according to [Write documentations](https://docs.sglang.io/developer_guide/contribution_guide.html#write-documentations). — Added `docs_new/docs/sglang-diffusion/progressive_resolution.mdx` with usage guide for all 5 models, added to `docs_new/docs.json` under **SGLang Diffusion → Performance Optimization**.
 - [x] Provide accuracy and speed benchmark results according to [Test the accuracy](https://docs.sglang.io/developer_guide/contribution_guide.html#test-the-accuracy) and [Benchmark the speed](https://docs.sglang.io/developer_guide/contribution_guide.html#benchmark-the-speed). — Denoising speedup tables for all 5 models + visual quality comparisons above; combined speedup-vs-δ plot included.
 - [x] Follow the SGLang code style [guidance](https://docs.sglang.io/developer_guide/contribution_guide.html#code-style-guidance). — import ordering, no unused imports, pure functions, no `.item()`/`.cpu()` on hot path, cached boolean checks in `__init__`.
-
-## Review and Merge Process
-
-1. Ping Merge Oncalls to start the process. See the [PR Merge Process](https://github.com/sgl-project/sglang/blob/main/.github/MAINTAINER.md#pull-request-merge-process).
-2. Get approvals from [CODEOWNERS](https://github.com/sgl-project/sglang/blob/main/.github/CODEOWNERS) and other reviewers.
-3. Trigger CI tests with `/tag-and-rerun-ci` comment (author does not have write access to trigger CI directly).
-4. After green CI and required approvals, ask Merge Oncalls or people with Write permission to merge the PR.
