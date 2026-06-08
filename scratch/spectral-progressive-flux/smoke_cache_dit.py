@@ -95,17 +95,16 @@ def run_config(gen: DiffGenerator, cfg: dict) -> float:
     )
     elapsed = time.time() - t0
 
-    # DiffGenerator swallows generation errors internally; detect failure via
-    # missing images rather than relying on an exception propagating.
-    images = getattr(result, "images", None)
-    if not images:
+    # DiffGenerator returns GenerationResult with .samples (PIL images).
+    # It swallows internal errors, so check samples rather than catching exceptions.
+    samples = getattr(result, "samples", None)
+    if not samples:
         raise RuntimeError(
-            f"Generation returned no images (elapsed {elapsed:.2f}s) — "
+            f"Generation returned no samples (elapsed {elapsed:.2f}s) — "
             "check logs above for the underlying error."
         )
-    img = images[0]
     out_path = OUT / f"{label}.png"
-    img.save(out_path)
+    samples[0].save(out_path)
     print(f"  Saved: {out_path}")
     print(f"  Wall time: {elapsed:.2f}s")
     return elapsed
