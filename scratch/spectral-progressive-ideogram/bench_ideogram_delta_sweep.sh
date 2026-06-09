@@ -23,7 +23,14 @@ TS=$(date +%Y%m%d_%H%M%S)
 RESULTS_DIR="$SCRIPT_DIR/results/delta_sweep_${TS}"
 mkdir -p "$RESULTS_DIR"
 
-PROMPT="A glass vase of sunflowers on a wooden table, studio photography, soft natural light, photorealistic"
+PROMPTS_JSON="/home/brianchc/ideogram4/experiments/prompts_snow_leopard.json"
+PROMPT=$(python3 -c "
+import json, sys
+with open('$PROMPTS_JSON') as f:
+    data = json.load(f)
+caption = data[0]['caption']
+print(json.dumps(caption))
+")
 SEED=42
 DELTAS=(0.01 0.02 0.05 0.1)
 STEPS=20   # V4_DEFAULT_20 preset
