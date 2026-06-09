@@ -23,7 +23,7 @@ TS=$(date +%Y%m%d_%H%M%S)
 RESULTS_DIR="$SCRIPT_DIR/results/delta_sweep_${TS}"
 mkdir -p "$RESULTS_DIR"
 
-PROMPT="Snow leopard mid-leap in Himalayan blizzard, motion blur, National Geographic style"
+PROMPT="A glass vase of sunflowers on a wooden table, studio photography, soft natural light, photorealistic"
 SEED=42
 DELTAS=(0.01 0.02 0.05 0.1)
 STEPS=20   # V4_DEFAULT_20 preset
