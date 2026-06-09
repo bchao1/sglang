@@ -1,0 +1,585 @@
+[select_gpu] CUDA_VISIBLE_DEVICES=8 (31177/49140 MiB free)
+
+=== zimage_fullres ===
+  output: /home/brianchc/sglang/scratch/final_PR_smoke/results_rerun_20260608_012128/zimage_fullres.png
+Unable to import `torchao` Tensor objects. This may affect loading checkpoints serialized with `torchao`
+[06-08 01:22:04] Auto memory policy for ZImagePipelineConfig selected layerwise offload components: text_encoder, image_encoder, vae
+[06-08 01:22:04] server_args: {"model_path": "/miele/brian/modelscope/Tongyi-MAI/Z-Image", "model_id": null, "backend": "auto", "attention_backend": "torch_sdpa", "attention_backend_config": {}, "component_attention_backends": {}, "cache_dit_config": null, "nccl_port": null, "trust_remote_code": false, "revision": null, "num_gpus": 1, "performance_mode": "auto", "base_gpu_id": 0, "gpu_ids": null, "tp_size": 1, "sp_degree": 1, "ulysses_degree": 1, "ring_degree": 1, "dp_size": 1, "dp_degree": 1, "enable_cfg_parallel": false, "cfg_parallel_degree": 1, "hsdp_replicate_dim": 1, "hsdp_shard_dim": 1, "dist_timeout": 3600, "pipeline_class_name": null, "lora_path": null, "lora_nickname": "default", "lora_scale": 1.0, "lora_merge_mode": "auto", "lora_weight_name": null, "component_paths": {}, "transformer_weights_path": null, "component_transformer_weights_paths": {}, "quantization": null, "quantization_ignored_layers": null, "lora_target_modules": null, "dit_cpu_offload": false, "dit_layerwise_offload": false, "layerwise_offload_components": ["text_encoder", "image_encoder", "vae"], "dit_offload_prefetch_size": 0.0, "text_encoder_cpu_offload": false, "image_encoder_cpu_offload": false, "vae_cpu_offload": false, "use_fsdp_inference": false, "pin_cpu_memory": true, "ltx2_two_stage_device_mode": null, "comfyui_mode": false, "enable_torch_compile": false, "enable_layerwise_nvtx_marker": false, "warmup": false, "server_warmup": false, "warmup_resolutions": null, "warmup_steps": 1, "disable_autocast": false, "master_port": 30005, "host": "127.0.0.1", "port": 30000, "webui": false, "webui_port": 12312, "scheduler_port": 5648, "batching_mode": "dynamic", "batching_max_size": 1, "batching_delay_ms": 0.0, "batching_config": null, "enable_batching_metrics": false, "strict_ports": false, "output_path": "outputs/", "input_save_path": "inputs/uploads", "prompt_file_path": null, "model_paths": {}, "model_loaded": {"transformer": true, "vae": true, "video_vae": true, "audio_vae": true, "video_dit": true, "audio_dit": true, "dual_tower_bridge": true}, "boundary_ratio": null, "disagg_role": "monolithic", "disagg_timeout": 3600, "disagg_downstream_wait_timeout": 1800, "disagg_dispatch_policy": "round_robin", "disagg_mode": false, "disagg_instance_id": 0, "disagg_max_slots_per_instance": 8, "disagg_transfer_redundancy": 1.25, "disagg_role_device": "auto", "disagg_transfer_backend": "auto", "disagg_transfer_pool_size": 268435456, "disagg_transfer_pin_memory": "auto", "disagg_p2p_hostname": "127.0.0.1", "disagg_ib_device": null, "disagg_server_addr": null, "encoder_urls": null, "denoiser_urls": null, "decoder_urls": null, "encoder_tp": null, "denoiser_tp": null, "denoiser_sp": null, "denoiser_ulysses": null, "denoiser_ring": null, "decoder_sp": null, "decoder_tp": null, "pool_work_endpoint": null, "pool_result_endpoint": null, "pool_control_endpoint": null, "pool_control_advertised_endpoint": null, "log_level": "info", "uvicorn_access_log_exclude_prefixes": [], "enable_trace": false, "otlp_traces_endpoint": "localhost:4317"}
+[06-08 01:22:04] Diffusers version: 0.37.0.dev0
+[06-08 01:22:04] Local mode: True
+[06-08 01:22:04] Starting server...
+Unable to import `torchao` Tensor objects. This may affect loading checkpoints serialized with `torchao`
+[06-08 01:22:16] Scheduler bind at endpoint: tcp://127.0.0.1:5648
+[06-08 01:22:17] Initializing distributed environment with world_size=1, device=cuda:0, timeout=3600
+[06-08 01:22:17] Setting distributed timeout to 3600 seconds
+[06-08 01:22:20] No pipeline_class_name specified, using model_index.json
+[06-08 01:22:20] Diffusers version: 0.37.0.dev0
+[06-08 01:22:20] Using pipeline from model_index.json: ZImagePipeline
+[06-08 01:22:20] Loading pipeline modules...
+[06-08 01:22:20] Model already exists locally and is complete
+[06-08 01:22:20] Model path: /miele/brian/modelscope/Tongyi-MAI/Z-Image
+[06-08 01:22:20] Diffusers version: 0.37.0.dev0
+[06-08 01:22:20] Loading pipeline modules from config: {'_class_name': 'ZImagePipeline', '_diffusers_version': '0.37.0.dev0', 'scheduler': ['diffusers', 'FlowMatchEulerDiscreteScheduler'], 'text_encoder': ['transformers', 'Qwen3Model'], 'tokenizer': ['transformers', 'Qwen2Tokenizer'], 'transformer': ['diffusers', 'ZImageTransformer2DModel'], 'vae': ['diffusers', 'AutoencoderKL']}
+[06-08 01:22:20] Loading required components: ['text_encoder', 'tokenizer', 'vae', 'transformer', 'scheduler']
+[06-08 01:22:20] Memory-aware component load order: ['transformer', 'text_encoder', 'vae', 'tokenizer', 'scheduler']
+Loading required modules:   0%|          | 0/5 [00:00<?, ?it/s][06-08 01:22:20] Loading transformer from /miele/brian/modelscope/Tongyi-MAI/Z-Image/transformer. avail mem: 25.53 GB
+[06-08 01:22:20] Loading ZImageTransformer2DModel from 2 safetensors file(s) , param_dtype: torch.bfloat16
+[06-08 01:22:20] Using Torch SDPA backend
+[06-08 01:22:20] Using torch_sdpa backend for transformer
+[06-08 01:22:24] [RunAI Streamer] Overall time to stream 11.5 GiB of all files to cpu: 3.69s, 3.1 GiB/s
+[06-08 01:22:28] Loaded transformer: ZImageTransformer2DModel (sgl-diffusion version). model size: 11.46 GB, consumed GPU mem: 11.89 GB, avail GPU mem: 13.64 GB
+Loading required modules:  20%|██        | 1/5 [00:07<00:30,  7.71s/it][06-08 01:22:28] Loading text_encoder from /miele/brian/modelscope/Tongyi-MAI/Z-Image/text_encoder. avail mem: 13.64 GB
+[06-08 01:22:28] Loading text_encoder on CPU first because it is selected for layerwise offload
+[06-08 01:22:28] Using Torch SDPA backend
+[06-08 01:22:28] Using torch_sdpa backend for text_encoder
+[06-08 01:22:31] [RunAI Streamer] Overall time to stream 7.5 GiB of all files to cpu: 2.68s, 2.8 GiB/s
+[06-08 01:22:36] LayerwiseOffloadManager initialized with num prefetched layer: 1, total num layers: 36
+[06-08 01:22:36] Enabled layerwise offload for Qwen3ForCausalLM on modules: ['layers']
+[06-08 01:22:36] Enabled layerwise offload for pipeline components: ['text_encoder']
+[06-08 01:22:36] Configured layerwise offload for text_encoder immediately after startup CPU staging
+[06-08 01:22:36] Loaded text_encoder: Qwen3ForCausalLM (sgl-diffusion version). model size: 0.92 GB, consumed GPU mem: 0.93 GB, avail GPU mem: 12.71 GB
+Loading required modules:  40%|████      | 2/5 [00:15<00:23,  7.80s/it][06-08 01:22:36] Loading vae from /miele/brian/modelscope/Tongyi-MAI/Z-Image/vae. avail mem: 12.71 GB
+[06-08 01:22:37] Loaded vae: AutoencoderKL (sgl-diffusion version). model size: 0.16 GB, consumed GPU mem: 0.01 GB, avail GPU mem: 12.70 GB
+Loading required modules:  60%|██████    | 3/5 [00:16<00:09,  4.62s/it][06-08 01:22:37] Loading tokenizer from /miele/brian/modelscope/Tongyi-MAI/Z-Image/tokenizer. avail mem: 12.70 GB
+[06-08 01:22:37] Loaded tokenizer: Qwen2Tokenizer (sgl-diffusion version). model size: NA GB, consumed GPU mem: 0.00 GB, avail GPU mem: 12.70 GB
+Loading required modules:  80%|████████  | 4/5 [00:16<00:02,  2.96s/it][06-08 01:22:37] Loading scheduler from /miele/brian/modelscope/Tongyi-MAI/Z-Image/scheduler. avail mem: 12.70 GB
+[06-08 01:22:37] Loaded scheduler: FlowMatchEulerDiscreteScheduler (sgl-diffusion version). model size: NA GB, consumed GPU mem: 0.00 GB, avail GPU mem: 12.70 GB
+Loading required modules: 100%|██████████| 5/5 [00:16<00:00,  3.37s/it]
+[06-08 01:22:37] Creating pipeline stages...
+[06-08 01:22:37] Using Torch SDPA backend
+[06-08 01:22:37] Pipeline instantiated
+[06-08 01:22:37] LayerwiseOffloadManager initialized with num prefetched layer: 1, total num layers: 4
+[06-08 01:22:37] LayerwiseOffloadManager initialized with num prefetched layer: 1, total num layers: 4
+[06-08 01:22:37] Enabled layerwise offload for AutoencoderKL on modules: ['encoder.down_blocks', 'decoder.up_blocks']
+[06-08 01:22:37] Enabled layerwise offload for pipeline components: ['text_encoder', 'vae']
+[06-08 01:22:37] Worker 0: Initialized device, model, and distributed environment.
+[06-08 01:22:37] Worker 0: Scheduler loop started.
+[06-08 01:22:37] Processing 1 grouped request(s)
+[06-08 01:22:37] Sampling params:
+                       width: 1024
+                      height: 1024
+                  num_frames: 1
+                         fps: 24
+                      prompt: <redacted, len=53>
+                  neg_prompt: <redacted, len=1>
+                        seed: 42
+                 infer_steps: 50
+      num_outputs_per_prompt: 1
+              guidance_scale: 5.0
+     embedded_guidance_scale: 6.0
+                    n_tokens: None
+                  flow_shift: None
+                  image_path: None
+                 save_output: True
+            output_file_path: /home/brianchc/sglang/scratch/final_PR_smoke/results_rerun_20260608_012128/zimage_fullres.png
+        
+[06-08 01:22:37] Running pipeline stages: ['InputValidationStage', 'TextEncodingStage', 'LatentPreparationStage', 'TimestepPreparationStage', 'denoising_stage', 'decoding_stage']
+[06-08 01:22:37] [InputValidationStage] started...
+[06-08 01:22:37] [InputValidationStage] finished in 0.0001 seconds
+[06-08 01:22:37] [TextEncodingStage] started...
+[06-08 01:22:40] [TextEncodingStage] finished in 2.8675 seconds
+[06-08 01:22:40] [LatentPreparationStage] started...
+[06-08 01:22:40] [LatentPreparationStage] finished in 0.0045 seconds
+[06-08 01:22:40] [TimestepPreparationStage] started...
+[06-08 01:22:40] [TimestepPreparationStage] finished in 0.0023 seconds
+[06-08 01:22:40] [DenoisingStage] started...
+  0%|          | 0/50 [00:00<?, ?it/s]  2%|▏         | 1/50 [00:03<03:15,  4.00s/it]  4%|▍         | 2/50 [00:06<02:17,  2.87s/it]  6%|▌         | 3/50 [00:08<01:57,  2.50s/it]  8%|▊         | 4/50 [00:10<01:47,  2.33s/it] 10%|█         | 5/50 [00:12<01:40,  2.24s/it] 12%|█▏        | 6/50 [00:14<01:36,  2.18s/it] 14%|█▍        | 7/50 [00:16<01:32,  2.15s/it] 16%|█▌        | 8/50 [00:18<01:29,  2.13s/it] 18%|█▊        | 9/50 [00:20<01:26,  2.11s/it] 20%|██        | 10/50 [00:22<01:24,  2.10s/it] 22%|██▏       | 11/50 [00:24<01:21,  2.10s/it] 24%|██▍       | 12/50 [00:26<01:19,  2.09s/it] 26%|██▌       | 13/50 [00:28<01:17,  2.09s/it] 28%|██▊       | 14/50 [00:31<01:15,  2.09s/it] 30%|███       | 15/50 [00:33<01:13,  2.09s/it] 32%|███▏      | 16/50 [00:35<01:10,  2.09s/it] 34%|███▍      | 17/50 [00:37<01:08,  2.09s/it] 36%|███▌      | 18/50 [00:39<01:06,  2.08s/it] 38%|███▊      | 19/50 [00:41<01:04,  2.08s/it] 40%|████      | 20/50 [00:43<01:02,  2.09s/it] 42%|████▏     | 21/50 [00:45<01:00,  2.09s/it] 44%|████▍     | 22/50 [00:47<00:58,  2.09s/it] 46%|████▌     | 23/50 [00:49<00:56,  2.09s/it] 48%|████▊     | 24/50 [00:51<00:54,  2.09s/it] 50%|█████     | 25/50 [00:53<00:52,  2.08s/it] 52%|█████▏    | 26/50 [00:56<00:50,  2.08s/it] 54%|█████▍    | 27/50 [00:58<00:47,  2.09s/it] 56%|█████▌    | 28/50 [01:00<00:45,  2.09s/it] 58%|█████▊    | 29/50 [01:02<00:43,  2.09s/it] 60%|██████    | 30/50 [01:04<00:41,  2.09s/it] 62%|██████▏   | 31/50 [01:06<00:39,  2.08s/it] 64%|██████▍   | 32/50 [01:08<00:37,  2.08s/it] 66%|██████▌   | 33/50 [01:10<00:35,  2.08s/it] 68%|██████▊   | 34/50 [01:12<00:33,  2.08s/it] 70%|███████   | 35/50 [01:14<00:31,  2.09s/it] 72%|███████▏  | 36/50 [01:16<00:29,  2.09s/it] 74%|███████▍  | 37/50 [01:19<00:27,  2.09s/it] 76%|███████▌  | 38/50 [01:21<00:25,  2.09s/it] 78%|███████▊  | 39/50 [01:22<00:22,  2.01s/it] 80%|████████  | 40/50 [01:23<00:17,  1.72s/it] 82%|████████▏ | 41/50 [01:25<00:14,  1.56s/it] 84%|████████▍ | 42/50 [01:27<00:13,  1.71s/it] 86%|████████▌ | 43/50 [01:29<00:12,  1.83s/it] 88%|████████▊ | 44/50 [01:31<00:11,  1.90s/it] 90%|█████████ | 45/50 [01:33<00:09,  1.96s/it] 92%|█████████▏| 46/50 [01:35<00:07,  2.00s/it] 94%|█████████▍| 47/50 [01:37<00:06,  2.02s/it] 96%|█████████▌| 48/50 [01:39<00:04,  2.04s/it] 98%|█████████▊| 49/50 [01:41<00:02,  2.06s/it]100%|██████████| 50/50 [01:43<00:00,  2.06s/it]100%|██████████| 50/50 [01:43<00:00,  2.08s/it]
+[06-08 01:24:24] [DenoisingStage] average time per step: 2.0779 seconds
+[06-08 01:24:24] [DenoisingStage] finished in 104.0371 seconds
+[06-08 01:24:24] [DecodingStage] started...
+[06-08 01:24:25] [DecodingStage] finished in 0.7515 seconds
+[06-08 01:24:25] Output saved to [1;36m/home/brianchc/sglang/scratch/final_PR_smoke/results_rerun_20260608_012128/zimage_fullres.png[0;0m
+[06-08 01:24:25] Pixel data generated successfully in [92m108.04[0;0m seconds
+[06-08 01:24:25] Memory usage - Max peak: 17664.00 MB, Avg peak: 17664.00 MB
+[93m[06-08 01:24:25] Generator was garbage collected without being shut down. Attempting to shut down the local server and client.[0;0m
+[06-08 01:24:29] Worker 0: Shutdown complete.
+  -> saved: /home/brianchc/sglang/scratch/final_PR_smoke/results_rerun_20260608_012128/zimage_fullres.png  (wall time: 162.28s)
+
+=== zimage_dct_rewind_d0.05 ===
+  output: /home/brianchc/sglang/scratch/final_PR_smoke/results_rerun_20260608_012128/zimage_dct_rewind_d0.05.png
+Unable to import `torchao` Tensor objects. This may affect loading checkpoints serialized with `torchao`
+[06-08 01:24:47] Auto memory policy for ZImagePipelineConfig selected layerwise offload components: text_encoder, image_encoder, vae
+[06-08 01:24:47] server_args: {"model_path": "/miele/brian/modelscope/Tongyi-MAI/Z-Image", "model_id": null, "backend": "auto", "attention_backend": "torch_sdpa", "attention_backend_config": {}, "component_attention_backends": {}, "cache_dit_config": null, "nccl_port": null, "trust_remote_code": false, "revision": null, "num_gpus": 1, "performance_mode": "auto", "base_gpu_id": 0, "gpu_ids": null, "tp_size": 1, "sp_degree": 1, "ulysses_degree": 1, "ring_degree": 1, "dp_size": 1, "dp_degree": 1, "enable_cfg_parallel": false, "cfg_parallel_degree": 1, "hsdp_replicate_dim": 1, "hsdp_shard_dim": 1, "dist_timeout": 3600, "pipeline_class_name": null, "lora_path": null, "lora_nickname": "default", "lora_scale": 1.0, "lora_merge_mode": "auto", "lora_weight_name": null, "component_paths": {}, "transformer_weights_path": null, "component_transformer_weights_paths": {}, "quantization": null, "quantization_ignored_layers": null, "lora_target_modules": null, "dit_cpu_offload": false, "dit_layerwise_offload": false, "layerwise_offload_components": ["text_encoder", "image_encoder", "vae"], "dit_offload_prefetch_size": 0.0, "text_encoder_cpu_offload": false, "image_encoder_cpu_offload": false, "vae_cpu_offload": false, "use_fsdp_inference": false, "pin_cpu_memory": true, "ltx2_two_stage_device_mode": null, "comfyui_mode": false, "enable_torch_compile": false, "enable_layerwise_nvtx_marker": false, "warmup": false, "server_warmup": false, "warmup_resolutions": null, "warmup_steps": 1, "disable_autocast": false, "master_port": 30005, "host": "127.0.0.1", "port": 30000, "webui": false, "webui_port": 12312, "scheduler_port": 5609, "batching_mode": "dynamic", "batching_max_size": 1, "batching_delay_ms": 0.0, "batching_config": null, "enable_batching_metrics": false, "strict_ports": false, "output_path": "outputs/", "input_save_path": "inputs/uploads", "prompt_file_path": null, "model_paths": {}, "model_loaded": {"transformer": true, "vae": true, "video_vae": true, "audio_vae": true, "video_dit": true, "audio_dit": true, "dual_tower_bridge": true}, "boundary_ratio": null, "disagg_role": "monolithic", "disagg_timeout": 3600, "disagg_downstream_wait_timeout": 1800, "disagg_dispatch_policy": "round_robin", "disagg_mode": false, "disagg_instance_id": 0, "disagg_max_slots_per_instance": 8, "disagg_transfer_redundancy": 1.25, "disagg_role_device": "auto", "disagg_transfer_backend": "auto", "disagg_transfer_pool_size": 268435456, "disagg_transfer_pin_memory": "auto", "disagg_p2p_hostname": "127.0.0.1", "disagg_ib_device": null, "disagg_server_addr": null, "encoder_urls": null, "denoiser_urls": null, "decoder_urls": null, "encoder_tp": null, "denoiser_tp": null, "denoiser_sp": null, "denoiser_ulysses": null, "denoiser_ring": null, "decoder_sp": null, "decoder_tp": null, "pool_work_endpoint": null, "pool_result_endpoint": null, "pool_control_endpoint": null, "pool_control_advertised_endpoint": null, "log_level": "info", "uvicorn_access_log_exclude_prefixes": [], "enable_trace": false, "otlp_traces_endpoint": "localhost:4317"}
+[06-08 01:24:47] Diffusers version: 0.37.0.dev0
+[06-08 01:24:47] Local mode: True
+[06-08 01:24:47] Starting server...
+Unable to import `torchao` Tensor objects. This may affect loading checkpoints serialized with `torchao`
+[06-08 01:24:59] Scheduler bind at endpoint: tcp://127.0.0.1:5609
+[06-08 01:24:59] Initializing distributed environment with world_size=1, device=cuda:0, timeout=3600
+[06-08 01:24:59] Setting distributed timeout to 3600 seconds
+[06-08 01:25:01] No pipeline_class_name specified, using model_index.json
+[06-08 01:25:01] Diffusers version: 0.37.0.dev0
+[06-08 01:25:01] Using pipeline from model_index.json: ZImagePipeline
+[06-08 01:25:01] Loading pipeline modules...
+[06-08 01:25:01] Model already exists locally and is complete
+[06-08 01:25:01] Model path: /miele/brian/modelscope/Tongyi-MAI/Z-Image
+[06-08 01:25:01] Diffusers version: 0.37.0.dev0
+[06-08 01:25:01] Loading pipeline modules from config: {'_class_name': 'ZImagePipeline', '_diffusers_version': '0.37.0.dev0', 'scheduler': ['diffusers', 'FlowMatchEulerDiscreteScheduler'], 'text_encoder': ['transformers', 'Qwen3Model'], 'tokenizer': ['transformers', 'Qwen2Tokenizer'], 'transformer': ['diffusers', 'ZImageTransformer2DModel'], 'vae': ['diffusers', 'AutoencoderKL']}
+[06-08 01:25:01] Loading required components: ['text_encoder', 'tokenizer', 'vae', 'transformer', 'scheduler']
+[06-08 01:25:02] Memory-aware component load order: ['transformer', 'text_encoder', 'vae', 'tokenizer', 'scheduler']
+Loading required modules:   0%|          | 0/5 [00:00<?, ?it/s][06-08 01:25:02] Loading transformer from /miele/brian/modelscope/Tongyi-MAI/Z-Image/transformer. avail mem: 25.53 GB
+[06-08 01:25:02] Loading ZImageTransformer2DModel from 2 safetensors file(s) , param_dtype: torch.bfloat16
+[06-08 01:25:02] Using Torch SDPA backend
+[06-08 01:25:02] Using torch_sdpa backend for transformer
+[06-08 01:25:04] [RunAI Streamer] Overall time to stream 11.5 GiB of all files to cpu: 1.82s, 6.3 GiB/s
+[06-08 01:25:08] Loaded transformer: ZImageTransformer2DModel (sgl-diffusion version). model size: 11.46 GB, consumed GPU mem: 11.89 GB, avail GPU mem: 13.64 GB
+Loading required modules:  20%|██        | 1/5 [00:05<00:21,  5.41s/it][06-08 01:25:08] Loading text_encoder from /miele/brian/modelscope/Tongyi-MAI/Z-Image/text_encoder. avail mem: 13.64 GB
+[06-08 01:25:08] Loading text_encoder on CPU first because it is selected for layerwise offload
+[06-08 01:25:08] Using Torch SDPA backend
+[06-08 01:25:08] Using torch_sdpa backend for text_encoder
+[06-08 01:25:09] [RunAI Streamer] Overall time to stream 7.5 GiB of all files to cpu: 1.54s, 4.9 GiB/s
+[06-08 01:25:14] LayerwiseOffloadManager initialized with num prefetched layer: 1, total num layers: 36
+[06-08 01:25:14] Enabled layerwise offload for Qwen3ForCausalLM on modules: ['layers']
+[06-08 01:25:14] Enabled layerwise offload for pipeline components: ['text_encoder']
+[06-08 01:25:14] Configured layerwise offload for text_encoder immediately after startup CPU staging
+[06-08 01:25:14] Loaded text_encoder: Qwen3ForCausalLM (sgl-diffusion version). model size: 0.92 GB, consumed GPU mem: 0.93 GB, avail GPU mem: 12.71 GB
+Loading required modules:  40%|████      | 2/5 [00:11<00:18,  6.00s/it][06-08 01:25:14] Loading vae from /miele/brian/modelscope/Tongyi-MAI/Z-Image/vae. avail mem: 12.71 GB
+[06-08 01:25:15] Loaded vae: AutoencoderKL (sgl-diffusion version). model size: 0.16 GB, consumed GPU mem: 0.01 GB, avail GPU mem: 12.70 GB
+Loading required modules:  60%|██████    | 3/5 [00:12<00:07,  3.64s/it][06-08 01:25:15] Loading tokenizer from /miele/brian/modelscope/Tongyi-MAI/Z-Image/tokenizer. avail mem: 12.70 GB
+[06-08 01:25:15] Loaded tokenizer: Qwen2Tokenizer (sgl-diffusion version). model size: NA GB, consumed GPU mem: 0.00 GB, avail GPU mem: 12.70 GB
+Loading required modules:  80%|████████  | 4/5 [00:13<00:02,  2.36s/it][06-08 01:25:15] Loading scheduler from /miele/brian/modelscope/Tongyi-MAI/Z-Image/scheduler. avail mem: 12.70 GB
+[06-08 01:25:15] Loaded scheduler: FlowMatchEulerDiscreteScheduler (sgl-diffusion version). model size: NA GB, consumed GPU mem: 0.00 GB, avail GPU mem: 12.70 GB
+Loading required modules: 100%|██████████| 5/5 [00:13<00:00,  2.61s/it]
+[06-08 01:25:15] Creating pipeline stages...
+[06-08 01:25:15] Using Torch SDPA backend
+[06-08 01:25:15] Pipeline instantiated
+[06-08 01:25:15] LayerwiseOffloadManager initialized with num prefetched layer: 1, total num layers: 4
+[06-08 01:25:15] LayerwiseOffloadManager initialized with num prefetched layer: 1, total num layers: 4
+[06-08 01:25:15] Enabled layerwise offload for AutoencoderKL on modules: ['encoder.down_blocks', 'decoder.up_blocks']
+[06-08 01:25:15] Enabled layerwise offload for pipeline components: ['text_encoder', 'vae']
+[06-08 01:25:15] Worker 0: Initialized device, model, and distributed environment.
+[06-08 01:25:15] Worker 0: Scheduler loop started.
+[06-08 01:25:15] Processing 1 grouped request(s)
+[06-08 01:25:15] Sampling params:
+                       width: 1024
+                      height: 1024
+                  num_frames: 1
+                         fps: 24
+                      prompt: <redacted, len=53>
+                  neg_prompt: <redacted, len=1>
+                        seed: 42
+                 infer_steps: 50
+      num_outputs_per_prompt: 1
+              guidance_scale: 5.0
+     embedded_guidance_scale: 6.0
+                    n_tokens: None
+                  flow_shift: None
+                  image_path: None
+                 save_output: True
+            output_file_path: /home/brianchc/sglang/scratch/final_PR_smoke/results_rerun_20260608_012128/zimage_dct_rewind_d0.05.png
+        
+[06-08 01:25:15] Running pipeline stages: ['InputValidationStage', 'TextEncodingStage', 'LatentPreparationStage', 'TimestepPreparationStage', 'denoising_stage', 'decoding_stage']
+[06-08 01:25:15] [InputValidationStage] started...
+[06-08 01:25:15] [InputValidationStage] finished in 0.0001 seconds
+[06-08 01:25:15] [TextEncodingStage] started...
+[06-08 01:25:18] [TextEncodingStage] finished in 2.9465 seconds
+[06-08 01:25:18] [LatentPreparationStage] started...
+[06-08 01:25:18] [LatentPreparationStage] finished in 0.0046 seconds
+[06-08 01:25:18] [TimestepPreparationStage] started...
+[06-08 01:25:18] [TimestepPreparationStage] finished in 0.0023 seconds
+[06-08 01:25:18] [DenoisingStage] started...
+[06-08 01:25:18] Progressive denoising: mode=dct_rewind levels=1 delta=0.050 initial=64x64
+[06-08 01:25:18] Stage 1/2: 64x64 latent, steps [0, 35)
+[06-08 01:25:40]   rewind: sigma=0.7102 → t_eff=0.8305 at step 35
+[06-08 01:25:40] Updated freqs_cis for 128x128 latent (pixel 1024x1024) across 2 branch(es)
+[06-08 01:25:40] Stage 2/2: 128x128 latent, steps [35, 50)
+[06-08 01:26:11] Progressive denoising done in 52.75s (avg 1.0551s/step)
+[06-08 01:26:11] [DenoisingStage] finished in 52.7710 seconds
+[06-08 01:26:11] [DecodingStage] started...
+[06-08 01:26:12] [DecodingStage] finished in 0.7427 seconds
+[06-08 01:26:12] Output saved to [1;36m/home/brianchc/sglang/scratch/final_PR_smoke/results_rerun_20260608_012128/zimage_dct_rewind_d0.05.png[0;0m
+[06-08 01:26:12] Pixel data generated successfully in [92m56.76[0;0m seconds
+[06-08 01:26:12] Memory usage - Max peak: 17664.00 MB, Avg peak: 17664.00 MB
+[93m[06-08 01:26:12] Generator was garbage collected without being shut down. Attempting to shut down the local server and client.[0;0m
+[06-08 01:26:18] Worker 0: Shutdown complete.
+  -> saved: /home/brianchc/sglang/scratch/final_PR_smoke/results_rerun_20260608_012128/zimage_dct_rewind_d0.05.png  (wall time: 108.15s)
+
+=== wan_fullres ===
+  output: /home/brianchc/sglang/scratch/final_PR_smoke/results_rerun_20260608_012128/wan_fullres.mp4
+Unable to import `torchao` Tensor objects. This may affect loading checkpoints serialized with `torchao`
+[06-08 01:26:35] Auto memory policy for WanT2V480PConfig selected layerwise offload components: text_encoder, image_encoder, vae
+[06-08 01:26:35] server_args: {"model_path": "/miele/brian/modelscope/Wan-AI/Wan2.1-T2V-1.3B-Diffusers", "model_id": null, "backend": "auto", "attention_backend": "torch_sdpa", "attention_backend_config": {}, "component_attention_backends": {}, "cache_dit_config": null, "nccl_port": null, "trust_remote_code": false, "revision": null, "num_gpus": 1, "performance_mode": "auto", "base_gpu_id": 0, "gpu_ids": null, "tp_size": 1, "sp_degree": 1, "ulysses_degree": 1, "ring_degree": 1, "dp_size": 1, "dp_degree": 1, "enable_cfg_parallel": false, "cfg_parallel_degree": 1, "hsdp_replicate_dim": 1, "hsdp_shard_dim": 1, "dist_timeout": 3600, "pipeline_class_name": null, "lora_path": null, "lora_nickname": "default", "lora_scale": 1.0, "lora_merge_mode": "auto", "lora_weight_name": null, "component_paths": {}, "transformer_weights_path": null, "component_transformer_weights_paths": {}, "quantization": null, "quantization_ignored_layers": null, "lora_target_modules": null, "dit_cpu_offload": false, "dit_layerwise_offload": false, "layerwise_offload_components": ["text_encoder", "image_encoder", "vae"], "dit_offload_prefetch_size": 0.0, "text_encoder_cpu_offload": false, "image_encoder_cpu_offload": false, "vae_cpu_offload": false, "use_fsdp_inference": false, "pin_cpu_memory": true, "ltx2_two_stage_device_mode": null, "comfyui_mode": false, "enable_torch_compile": false, "enable_layerwise_nvtx_marker": false, "warmup": false, "server_warmup": false, "warmup_resolutions": null, "warmup_steps": 1, "disable_autocast": false, "master_port": 30005, "host": "127.0.0.1", "port": 30000, "webui": false, "webui_port": 12312, "scheduler_port": 5639, "batching_mode": "dynamic", "batching_max_size": 1, "batching_delay_ms": 0.0, "batching_config": null, "enable_batching_metrics": false, "strict_ports": false, "output_path": "outputs/", "input_save_path": "inputs/uploads", "prompt_file_path": null, "model_paths": {}, "model_loaded": {"transformer": true, "vae": true, "video_vae": true, "audio_vae": true, "video_dit": true, "audio_dit": true, "dual_tower_bridge": true}, "boundary_ratio": null, "disagg_role": "monolithic", "disagg_timeout": 3600, "disagg_downstream_wait_timeout": 1800, "disagg_dispatch_policy": "round_robin", "disagg_mode": false, "disagg_instance_id": 0, "disagg_max_slots_per_instance": 8, "disagg_transfer_redundancy": 1.25, "disagg_role_device": "auto", "disagg_transfer_backend": "auto", "disagg_transfer_pool_size": 268435456, "disagg_transfer_pin_memory": "auto", "disagg_p2p_hostname": "127.0.0.1", "disagg_ib_device": null, "disagg_server_addr": null, "encoder_urls": null, "denoiser_urls": null, "decoder_urls": null, "encoder_tp": null, "denoiser_tp": null, "denoiser_sp": null, "denoiser_ulysses": null, "denoiser_ring": null, "decoder_sp": null, "decoder_tp": null, "pool_work_endpoint": null, "pool_result_endpoint": null, "pool_control_endpoint": null, "pool_control_advertised_endpoint": null, "log_level": "info", "uvicorn_access_log_exclude_prefixes": [], "enable_trace": false, "otlp_traces_endpoint": "localhost:4317"}
+[06-08 01:26:35] Diffusers version: 0.33.0.dev0
+[06-08 01:26:35] Local mode: True
+[06-08 01:26:35] Starting server...
+Unable to import `torchao` Tensor objects. This may affect loading checkpoints serialized with `torchao`
+[06-08 01:26:48] Scheduler bind at endpoint: tcp://127.0.0.1:5639
+[06-08 01:26:48] Initializing distributed environment with world_size=1, device=cuda:0, timeout=3600
+[06-08 01:26:48] Setting distributed timeout to 3600 seconds
+[06-08 01:26:52] No pipeline_class_name specified, using model_index.json
+[06-08 01:26:52] Diffusers version: 0.33.0.dev0
+[06-08 01:26:52] Using pipeline from model_index.json: WanPipeline
+[06-08 01:26:52] Loading pipeline modules...
+[06-08 01:26:52] Model already exists locally and is complete
+[06-08 01:26:52] Model path: /miele/brian/modelscope/Wan-AI/Wan2.1-T2V-1.3B-Diffusers
+[06-08 01:26:52] Diffusers version: 0.33.0.dev0
+[06-08 01:26:52] Loading pipeline modules from config: {'_class_name': 'WanPipeline', '_diffusers_version': '0.33.0.dev0', 'scheduler': ['diffusers', 'UniPCMultistepScheduler'], 'text_encoder': ['transformers', 'UMT5EncoderModel'], 'tokenizer': ['transformers', 'T5TokenizerFast'], 'transformer': ['diffusers', 'WanTransformer3DModel'], 'vae': ['diffusers', 'AutoencoderKLWan']}
+[06-08 01:26:52] Loading required components: ['text_encoder', 'tokenizer', 'vae', 'transformer', 'scheduler']
+[06-08 01:26:52] Memory-aware component load order: ['text_encoder', 'transformer', 'vae', 'tokenizer', 'scheduler']
+Loading required modules:   0%|          | 0/5 [00:00<?, ?it/s][06-08 01:26:52] Loading text_encoder from /miele/brian/modelscope/Wan-AI/Wan2.1-T2V-1.3B-Diffusers/text_encoder. avail mem: 25.53 GB
+[06-08 01:26:52] Loading text_encoder on CPU first because it is selected for layerwise offload
+[06-08 01:27:38] [RunAI Streamer] Overall time to stream 21.2 GiB of all files to cpu: 46.26s, 468.4 MiB/s
+[06-08 01:27:54] LayerwiseOffloadManager initialized with num prefetched layer: 1, total num layers: 24
+[06-08 01:27:54] Enabled layerwise offload for UMT5EncoderModel on modules: ['encoder.block']
+[06-08 01:27:54] Enabled layerwise offload for pipeline components: ['text_encoder']
+[06-08 01:27:54] Configured layerwise offload for text_encoder immediately after startup CPU staging
+[06-08 01:27:54] Loaded text_encoder: UMT5EncoderModel (sgl-diffusion version). model size: 4.63 GB, consumed GPU mem: 4.68 GB, avail GPU mem: 20.85 GB
+Loading required modules:  20%|██        | 1/5 [01:02<04:08, 62.02s/it][06-08 01:27:54] Loading transformer from /miele/brian/modelscope/Wan-AI/Wan2.1-T2V-1.3B-Diffusers/transformer. avail mem: 20.85 GB
+[06-08 01:27:54] Loading WanTransformer3DModel from 2 safetensors file(s) , param_dtype: torch.bfloat16
+[06-08 01:27:54] Using Torch SDPA backend
+[06-08 01:27:54] Using torch_sdpa backend for transformer
+[06-08 01:27:54] Using Torch SDPA backend
+[06-08 01:27:55] [RunAI Streamer] Overall time to stream 5.3 GiB of all files to cpu: 1.44s, 3.7 GiB/s
+[06-08 01:28:00] Loaded transformer: WanTransformer3DModel (sgl-diffusion version). model size: 2.64 GB, consumed GPU mem: 2.82 GB, avail GPU mem: 18.03 GB
+Loading required modules:  40%|████      | 2/5 [01:07<01:26, 28.95s/it][06-08 01:28:00] Loading vae from /miele/brian/modelscope/Wan-AI/Wan2.1-T2V-1.3B-Diffusers/vae. avail mem: 18.03 GB
+[93m[06-08 01:28:00] VAE unexpected keys: ['encoder.conv_in.bias', 'encoder.conv_in.weight', 'encoder.conv_out.bias', 'encoder.conv_out.weight', 'encoder.down_blocks.0.conv1.bias', 'encoder.down_blocks.0.conv1.weight', 'encoder.down_blocks.0.conv2.bias', 'encoder.down_blocks.0.conv2.weight', 'encoder.down_blocks.0.norm1.gamma', 'encoder.down_blocks.0.norm2.gamma', 'encoder.down_blocks.1.conv1.bias', 'encoder.down_blocks.1.conv1.weight', 'encoder.down_blocks.1.conv2.bias', 'encoder.down_blocks.1.conv2.weight', 'encoder.down_blocks.1.norm1.gamma', 'encoder.down_blocks.1.norm2.gamma', 'encoder.down_blocks.10.conv1.bias', 'encoder.down_blocks.10.conv1.weight', 'encoder.down_blocks.10.conv2.bias', 'encoder.down_blocks.10.conv2.weight', 'encoder.down_blocks.10.norm1.gamma', 'encoder.down_blocks.10.norm2.gamma', 'encoder.down_blocks.2.resample.1.bias', 'encoder.down_blocks.2.resample.1.weight', 'encoder.down_blocks.3.conv1.bias', 'encoder.down_blocks.3.conv1.weight', 'encoder.down_blocks.3.conv2.bias', 'encoder.down_blocks.3.conv2.weight', 'encoder.down_blocks.3.conv_shortcut.bias', 'encoder.down_blocks.3.conv_shortcut.weight', 'encoder.down_blocks.3.norm1.gamma', 'encoder.down_blocks.3.norm2.gamma', 'encoder.down_blocks.4.conv1.bias', 'encoder.down_blocks.4.conv1.weight', 'encoder.down_blocks.4.conv2.bias', 'encoder.down_blocks.4.conv2.weight', 'encoder.down_blocks.4.norm1.gamma', 'encoder.down_blocks.4.norm2.gamma', 'encoder.down_blocks.5.resample.1.bias', 'encoder.down_blocks.5.resample.1.weight', 'encoder.down_blocks.5.time_conv.bias', 'encoder.down_blocks.5.time_conv.weight', 'encoder.down_blocks.6.conv1.bias', 'encoder.down_blocks.6.conv1.weight', 'encoder.down_blocks.6.conv2.bias', 'encoder.down_blocks.6.conv2.weight', 'encoder.down_blocks.6.conv_shortcut.bias', 'encoder.down_blocks.6.conv_shortcut.weight', 'encoder.down_blocks.6.norm1.gamma', 'encoder.down_blocks.6.norm2.gamma', 'encoder.down_blocks.7.conv1.bias', 'encoder.down_blocks.7.conv1.weight', 'encoder.down_blocks.7.conv2.bias', 'encoder.down_blocks.7.conv2.weight', 'encoder.down_blocks.7.norm1.gamma', 'encoder.down_blocks.7.norm2.gamma', 'encoder.down_blocks.8.resample.1.bias', 'encoder.down_blocks.8.resample.1.weight', 'encoder.down_blocks.8.time_conv.bias', 'encoder.down_blocks.8.time_conv.weight', 'encoder.down_blocks.9.conv1.bias', 'encoder.down_blocks.9.conv1.weight', 'encoder.down_blocks.9.conv2.bias', 'encoder.down_blocks.9.conv2.weight', 'encoder.down_blocks.9.norm1.gamma', 'encoder.down_blocks.9.norm2.gamma', 'encoder.mid_block.attentions.0.norm.gamma', 'encoder.mid_block.attentions.0.proj.bias', 'encoder.mid_block.attentions.0.proj.weight', 'encoder.mid_block.attentions.0.to_qkv.bias', 'encoder.mid_block.attentions.0.to_qkv.weight', 'encoder.mid_block.resnets.0.conv1.bias', 'encoder.mid_block.resnets.0.conv1.weight', 'encoder.mid_block.resnets.0.conv2.bias', 'encoder.mid_block.resnets.0.conv2.weight', 'encoder.mid_block.resnets.0.norm1.gamma', 'encoder.mid_block.resnets.0.norm2.gamma', 'encoder.mid_block.resnets.1.conv1.bias', 'encoder.mid_block.resnets.1.conv1.weight', 'encoder.mid_block.resnets.1.conv2.bias', 'encoder.mid_block.resnets.1.conv2.weight', 'encoder.mid_block.resnets.1.norm1.gamma', 'encoder.mid_block.resnets.1.norm2.gamma', 'encoder.norm_out.gamma'][0;0m
+[06-08 01:28:00] VAE: converted 35 Conv3d weights to channels_last_3d
+[06-08 01:28:00] Loaded vae: AutoencoderKLWan (sgl-diffusion version). model size: 0.27 GB, consumed GPU mem: 0.30 GB, avail GPU mem: 17.73 GB
+Loading required modules:  60%|██████    | 3/5 [01:08<00:31, 16.00s/it][06-08 01:28:00] Loading tokenizer from /miele/brian/modelscope/Wan-AI/Wan2.1-T2V-1.3B-Diffusers/tokenizer. avail mem: 17.73 GB
+[06-08 01:28:02] Loaded tokenizer: T5Tokenizer (sgl-diffusion version). model size: NA GB, consumed GPU mem: 0.00 GB, avail GPU mem: 17.73 GB
+Loading required modules:  80%|████████  | 4/5 [01:10<00:10, 10.47s/it][06-08 01:28:02] Loading scheduler from /miele/brian/modelscope/Wan-AI/Wan2.1-T2V-1.3B-Diffusers/scheduler. avail mem: 17.73 GB
+[06-08 01:28:02] Loaded scheduler: UniPCMultistepScheduler (sgl-diffusion version). model size: NA GB, consumed GPU mem: 0.00 GB, avail GPU mem: 17.73 GB
+Loading required modules: 100%|██████████| 5/5 [01:10<00:00, 14.08s/it]
+[06-08 01:28:02] Creating pipeline stages...
+[06-08 01:28:02] Using Torch SDPA backend
+[06-08 01:28:02] Pipeline instantiated
+[06-08 01:28:02] LayerwiseOffloadManager initialized with num prefetched layer: 1, total num layers: 4
+[06-08 01:28:02] Enabled layerwise offload for AutoencoderKLWan on modules: ['decoder.up_blocks']
+[06-08 01:28:02] Enabled layerwise offload for pipeline components: ['text_encoder', 'vae']
+[06-08 01:28:02] Worker 0: Initialized device, model, and distributed environment.
+[06-08 01:28:02] Worker 0: Scheduler loop started.
+[06-08 01:28:02] Sequence dimension shard is enabled, disabling frame adjustment for better performance
+[06-08 01:28:02] Adjusting number of frames from 81 to 81 based on model
+[06-08 01:28:02] Processing 1 grouped request(s)
+[06-08 01:28:02] Sampling params:
+                       width: 832
+                      height: 480
+                  num_frames: 81
+                         fps: 16
+                      prompt: <redacted, len=79>
+                  neg_prompt: <redacted, len=392>
+                        seed: 42
+                 infer_steps: 50
+      num_outputs_per_prompt: 1
+              guidance_scale: 5.0
+     embedded_guidance_scale: 6.0
+                    n_tokens: None
+                  flow_shift: 5.0
+                  image_path: None
+                 save_output: True
+            output_file_path: /home/brianchc/sglang/scratch/final_PR_smoke/results_rerun_20260608_012128/wan_fullres.mp4
+        
+[06-08 01:28:02] Running pipeline stages: ['InputValidationStage', 'TextEncodingStage', 'LatentPreparationStage', 'TimestepPreparationStage', 'denoising_stage', 'decoding_stage']
+[06-08 01:28:02] [InputValidationStage] started...
+[06-08 01:28:02] [InputValidationStage] finished in 0.0001 seconds
+[06-08 01:28:02] [TextEncodingStage] started...
+[06-08 01:28:04] [TextEncodingStage] finished in 1.8975 seconds
+[06-08 01:28:04] [LatentPreparationStage] started...
+[06-08 01:28:04] [LatentPreparationStage] finished in 0.0046 seconds
+[06-08 01:28:04] [TimestepPreparationStage] started...
+[06-08 01:28:04] [TimestepPreparationStage] finished in 0.0043 seconds
+[06-08 01:28:04] [DenoisingStage] started...
+  0%|          | 0/50 [00:00<?, ?it/s]  2%|▏         | 1/50 [00:13<11:14, 13.76s/it]  4%|▍         | 2/50 [00:18<06:46,  8.48s/it]  6%|▌         | 3/50 [00:29<07:27,  9.51s/it]  8%|▊         | 4/50 [00:39<07:37,  9.95s/it] 10%|█         | 5/50 [00:50<07:38, 10.19s/it] 12%|█▏        | 6/50 [01:01<07:34, 10.33s/it] 14%|█▍        | 7/50 [01:11<07:28, 10.42s/it] 16%|█▌        | 8/50 [01:22<07:20, 10.49s/it] 18%|█▊        | 9/50 [01:33<07:11, 10.53s/it] 20%|██        | 10/50 [01:43<07:02, 10.56s/it] 22%|██▏       | 11/50 [01:54<06:52, 10.58s/it] 24%|██▍       | 12/50 [02:04<06:42, 10.59s/it] 26%|██▌       | 13/50 [02:15<06:32, 10.60s/it] 28%|██▊       | 14/50 [02:26<06:21, 10.61s/it] 30%|███       | 15/50 [02:36<06:11, 10.62s/it] 32%|███▏      | 16/50 [02:47<06:01, 10.62s/it] 34%|███▍      | 17/50 [02:55<05:30, 10.01s/it] 36%|███▌      | 18/50 [03:06<05:26, 10.20s/it] 38%|███▊      | 19/50 [03:17<05:20, 10.33s/it] 40%|████      | 20/50 [03:27<05:12, 10.42s/it] 42%|████▏     | 21/50 [03:38<05:03, 10.48s/it] 44%|████▍     | 22/50 [03:49<04:54, 10.52s/it] 46%|████▌     | 23/50 [03:59<04:45, 10.56s/it] 48%|████▊     | 24/50 [04:10<04:34, 10.58s/it] 50%|█████     | 25/50 [04:20<04:24, 10.59s/it] 52%|█████▏    | 26/50 [04:31<04:14, 10.60s/it] 54%|█████▍    | 27/50 [04:38<03:35,  9.36s/it] 56%|█████▌    | 28/50 [04:43<02:58,  8.12s/it] 58%|█████▊    | 29/50 [04:50<02:42,  7.74s/it] 60%|██████    | 30/50 [05:00<02:52,  8.60s/it] 62%|██████▏   | 31/50 [05:11<02:54,  9.21s/it] 64%|██████▍   | 32/50 [05:21<02:53,  9.63s/it] 66%|██████▌   | 33/50 [05:32<02:48,  9.93s/it] 68%|██████▊   | 34/50 [05:43<02:42, 10.13s/it] 70%|███████   | 35/50 [05:53<02:34, 10.28s/it] 72%|███████▏  | 36/50 [06:04<02:25, 10.38s/it] 74%|███████▍  | 37/50 [06:15<02:15, 10.45s/it] 76%|███████▌  | 38/50 [06:25<02:05, 10.50s/it] 78%|███████▊  | 39/50 [06:36<01:55, 10.54s/it] 80%|████████  | 40/50 [06:46<01:45, 10.56s/it] 82%|████████▏ | 41/50 [06:57<01:35, 10.58s/it] 84%|████████▍ | 42/50 [07:08<01:24, 10.59s/it] 86%|████████▌ | 43/50 [07:18<01:14, 10.60s/it] 88%|████████▊ | 44/50 [07:29<01:03, 10.60s/it] 90%|█████████ | 45/50 [07:40<00:53, 10.61s/it] 92%|█████████▏| 46/50 [07:50<00:42, 10.61s/it] 94%|█████████▍| 47/50 [08:01<00:31, 10.61s/it] 96%|█████████▌| 48/50 [08:11<00:21, 10.61s/it] 98%|█████████▊| 49/50 [08:22<00:10, 10.61s/it]100%|██████████| 50/50 [08:32<00:00, 10.56s/it]100%|██████████| 50/50 [08:32<00:00, 10.26s/it]
+[06-08 01:36:37] [DenoisingStage] average time per step: 10.2586 seconds
+[06-08 01:36:37] [DenoisingStage] finished in 512.9340 seconds
+[06-08 01:36:37] [DecodingStage] started...
+[06-08 01:37:06] [DecodingStage] finished in 28.5308 seconds
+[06-08 01:37:09] Output saved to [1;36m/home/brianchc/sglang/scratch/final_PR_smoke/results_rerun_20260608_012128/wan_fullres.mp4[0;0m
+[06-08 01:37:09] Pixel data generated successfully in [92m547.01[0;0m seconds
+[06-08 01:37:09] Memory usage - Max peak: 20032.00 MB, Avg peak: 20032.00 MB
+[93m[06-08 01:37:09] Generator was garbage collected without being shut down. Attempting to shut down the local server and client.[0;0m
+[06-08 01:37:13] Worker 0: Shutdown complete.
+  -> saved: /home/brianchc/sglang/scratch/final_PR_smoke/results_rerun_20260608_012128/wan_fullres.mp4  (wall time: 658.15s)
+
+=== wan_dct_rewind_d0.05 ===
+  output: /home/brianchc/sglang/scratch/final_PR_smoke/results_rerun_20260608_012128/wan_dct_rewind_d0.05.mp4
+Unable to import `torchao` Tensor objects. This may affect loading checkpoints serialized with `torchao`
+[06-08 01:37:32] Auto memory policy for WanT2V480PConfig selected layerwise offload components: text_encoder, image_encoder, vae
+[06-08 01:37:32] server_args: {"model_path": "/miele/brian/modelscope/Wan-AI/Wan2.1-T2V-1.3B-Diffusers", "model_id": null, "backend": "auto", "attention_backend": "torch_sdpa", "attention_backend_config": {}, "component_attention_backends": {}, "cache_dit_config": null, "nccl_port": null, "trust_remote_code": false, "revision": null, "num_gpus": 1, "performance_mode": "auto", "base_gpu_id": 0, "gpu_ids": null, "tp_size": 1, "sp_degree": 1, "ulysses_degree": 1, "ring_degree": 1, "dp_size": 1, "dp_degree": 1, "enable_cfg_parallel": false, "cfg_parallel_degree": 1, "hsdp_replicate_dim": 1, "hsdp_shard_dim": 1, "dist_timeout": 3600, "pipeline_class_name": null, "lora_path": null, "lora_nickname": "default", "lora_scale": 1.0, "lora_merge_mode": "auto", "lora_weight_name": null, "component_paths": {}, "transformer_weights_path": null, "component_transformer_weights_paths": {}, "quantization": null, "quantization_ignored_layers": null, "lora_target_modules": null, "dit_cpu_offload": false, "dit_layerwise_offload": false, "layerwise_offload_components": ["text_encoder", "image_encoder", "vae"], "dit_offload_prefetch_size": 0.0, "text_encoder_cpu_offload": false, "image_encoder_cpu_offload": false, "vae_cpu_offload": false, "use_fsdp_inference": false, "pin_cpu_memory": true, "ltx2_two_stage_device_mode": null, "comfyui_mode": false, "enable_torch_compile": false, "enable_layerwise_nvtx_marker": false, "warmup": false, "server_warmup": false, "warmup_resolutions": null, "warmup_steps": 1, "disable_autocast": false, "master_port": 30005, "host": "127.0.0.1", "port": 30000, "webui": false, "webui_port": 12312, "scheduler_port": 5624, "batching_mode": "dynamic", "batching_max_size": 1, "batching_delay_ms": 0.0, "batching_config": null, "enable_batching_metrics": false, "strict_ports": false, "output_path": "outputs/", "input_save_path": "inputs/uploads", "prompt_file_path": null, "model_paths": {}, "model_loaded": {"transformer": true, "vae": true, "video_vae": true, "audio_vae": true, "video_dit": true, "audio_dit": true, "dual_tower_bridge": true}, "boundary_ratio": null, "disagg_role": "monolithic", "disagg_timeout": 3600, "disagg_downstream_wait_timeout": 1800, "disagg_dispatch_policy": "round_robin", "disagg_mode": false, "disagg_instance_id": 0, "disagg_max_slots_per_instance": 8, "disagg_transfer_redundancy": 1.25, "disagg_role_device": "auto", "disagg_transfer_backend": "auto", "disagg_transfer_pool_size": 268435456, "disagg_transfer_pin_memory": "auto", "disagg_p2p_hostname": "127.0.0.1", "disagg_ib_device": null, "disagg_server_addr": null, "encoder_urls": null, "denoiser_urls": null, "decoder_urls": null, "encoder_tp": null, "denoiser_tp": null, "denoiser_sp": null, "denoiser_ulysses": null, "denoiser_ring": null, "decoder_sp": null, "decoder_tp": null, "pool_work_endpoint": null, "pool_result_endpoint": null, "pool_control_endpoint": null, "pool_control_advertised_endpoint": null, "log_level": "info", "uvicorn_access_log_exclude_prefixes": [], "enable_trace": false, "otlp_traces_endpoint": "localhost:4317"}
+[06-08 01:37:32] Diffusers version: 0.33.0.dev0
+[06-08 01:37:32] Local mode: True
+[06-08 01:37:32] Starting server...
+Unable to import `torchao` Tensor objects. This may affect loading checkpoints serialized with `torchao`
+[06-08 01:37:44] Scheduler bind at endpoint: tcp://127.0.0.1:5624
+[06-08 01:37:44] Initializing distributed environment with world_size=1, device=cuda:0, timeout=3600
+[06-08 01:37:44] Setting distributed timeout to 3600 seconds
+[06-08 01:37:47] No pipeline_class_name specified, using model_index.json
+[06-08 01:37:47] Diffusers version: 0.33.0.dev0
+[06-08 01:37:47] Using pipeline from model_index.json: WanPipeline
+[06-08 01:37:47] Loading pipeline modules...
+[06-08 01:37:47] Model already exists locally and is complete
+[06-08 01:37:47] Model path: /miele/brian/modelscope/Wan-AI/Wan2.1-T2V-1.3B-Diffusers
+[06-08 01:37:47] Diffusers version: 0.33.0.dev0
+[06-08 01:37:47] Loading pipeline modules from config: {'_class_name': 'WanPipeline', '_diffusers_version': '0.33.0.dev0', 'scheduler': ['diffusers', 'UniPCMultistepScheduler'], 'text_encoder': ['transformers', 'UMT5EncoderModel'], 'tokenizer': ['transformers', 'T5TokenizerFast'], 'transformer': ['diffusers', 'WanTransformer3DModel'], 'vae': ['diffusers', 'AutoencoderKLWan']}
+[06-08 01:37:47] Loading required components: ['text_encoder', 'tokenizer', 'vae', 'transformer', 'scheduler']
+[06-08 01:37:49] Memory-aware component load order: ['text_encoder', 'transformer', 'vae', 'tokenizer', 'scheduler']
+Loading required modules:   0%|          | 0/5 [00:00<?, ?it/s][06-08 01:37:49] Loading text_encoder from /miele/brian/modelscope/Wan-AI/Wan2.1-T2V-1.3B-Diffusers/text_encoder. avail mem: 25.53 GB
+[06-08 01:37:49] Loading text_encoder on CPU first because it is selected for layerwise offload
+[06-08 01:37:54] [RunAI Streamer] Overall time to stream 21.2 GiB of all files to cpu: 4.97s, 4.3 GiB/s
+[06-08 01:38:08] LayerwiseOffloadManager initialized with num prefetched layer: 1, total num layers: 24
+[06-08 01:38:08] Enabled layerwise offload for UMT5EncoderModel on modules: ['encoder.block']
+[06-08 01:38:08] Enabled layerwise offload for pipeline components: ['text_encoder']
+[06-08 01:38:08] Configured layerwise offload for text_encoder immediately after startup CPU staging
+[06-08 01:38:08] Loaded text_encoder: UMT5EncoderModel (sgl-diffusion version). model size: 4.63 GB, consumed GPU mem: 4.68 GB, avail GPU mem: 20.85 GB
+Loading required modules:  20%|██        | 1/5 [00:19<01:17, 19.50s/it][06-08 01:38:08] Loading transformer from /miele/brian/modelscope/Wan-AI/Wan2.1-T2V-1.3B-Diffusers/transformer. avail mem: 20.85 GB
+[06-08 01:38:08] Loading WanTransformer3DModel from 2 safetensors file(s) , param_dtype: torch.bfloat16
+[06-08 01:38:08] Using Torch SDPA backend
+[06-08 01:38:08] Using torch_sdpa backend for transformer
+[06-08 01:38:08] Using Torch SDPA backend
+[06-08 01:38:09] [RunAI Streamer] Overall time to stream 5.3 GiB of all files to cpu: 0.88s, 6.0 GiB/s
+[06-08 01:38:13] Loaded transformer: WanTransformer3DModel (sgl-diffusion version). model size: 2.64 GB, consumed GPU mem: 2.82 GB, avail GPU mem: 18.03 GB
+Loading required modules:  40%|████      | 2/5 [00:23<00:31, 10.61s/it][06-08 01:38:13] Loading vae from /miele/brian/modelscope/Wan-AI/Wan2.1-T2V-1.3B-Diffusers/vae. avail mem: 18.03 GB
+[93m[06-08 01:38:13] VAE unexpected keys: ['encoder.conv_in.bias', 'encoder.conv_in.weight', 'encoder.conv_out.bias', 'encoder.conv_out.weight', 'encoder.down_blocks.0.conv1.bias', 'encoder.down_blocks.0.conv1.weight', 'encoder.down_blocks.0.conv2.bias', 'encoder.down_blocks.0.conv2.weight', 'encoder.down_blocks.0.norm1.gamma', 'encoder.down_blocks.0.norm2.gamma', 'encoder.down_blocks.1.conv1.bias', 'encoder.down_blocks.1.conv1.weight', 'encoder.down_blocks.1.conv2.bias', 'encoder.down_blocks.1.conv2.weight', 'encoder.down_blocks.1.norm1.gamma', 'encoder.down_blocks.1.norm2.gamma', 'encoder.down_blocks.10.conv1.bias', 'encoder.down_blocks.10.conv1.weight', 'encoder.down_blocks.10.conv2.bias', 'encoder.down_blocks.10.conv2.weight', 'encoder.down_blocks.10.norm1.gamma', 'encoder.down_blocks.10.norm2.gamma', 'encoder.down_blocks.2.resample.1.bias', 'encoder.down_blocks.2.resample.1.weight', 'encoder.down_blocks.3.conv1.bias', 'encoder.down_blocks.3.conv1.weight', 'encoder.down_blocks.3.conv2.bias', 'encoder.down_blocks.3.conv2.weight', 'encoder.down_blocks.3.conv_shortcut.bias', 'encoder.down_blocks.3.conv_shortcut.weight', 'encoder.down_blocks.3.norm1.gamma', 'encoder.down_blocks.3.norm2.gamma', 'encoder.down_blocks.4.conv1.bias', 'encoder.down_blocks.4.conv1.weight', 'encoder.down_blocks.4.conv2.bias', 'encoder.down_blocks.4.conv2.weight', 'encoder.down_blocks.4.norm1.gamma', 'encoder.down_blocks.4.norm2.gamma', 'encoder.down_blocks.5.resample.1.bias', 'encoder.down_blocks.5.resample.1.weight', 'encoder.down_blocks.5.time_conv.bias', 'encoder.down_blocks.5.time_conv.weight', 'encoder.down_blocks.6.conv1.bias', 'encoder.down_blocks.6.conv1.weight', 'encoder.down_blocks.6.conv2.bias', 'encoder.down_blocks.6.conv2.weight', 'encoder.down_blocks.6.conv_shortcut.bias', 'encoder.down_blocks.6.conv_shortcut.weight', 'encoder.down_blocks.6.norm1.gamma', 'encoder.down_blocks.6.norm2.gamma', 'encoder.down_blocks.7.conv1.bias', 'encoder.down_blocks.7.conv1.weight', 'encoder.down_blocks.7.conv2.bias', 'encoder.down_blocks.7.conv2.weight', 'encoder.down_blocks.7.norm1.gamma', 'encoder.down_blocks.7.norm2.gamma', 'encoder.down_blocks.8.resample.1.bias', 'encoder.down_blocks.8.resample.1.weight', 'encoder.down_blocks.8.time_conv.bias', 'encoder.down_blocks.8.time_conv.weight', 'encoder.down_blocks.9.conv1.bias', 'encoder.down_blocks.9.conv1.weight', 'encoder.down_blocks.9.conv2.bias', 'encoder.down_blocks.9.conv2.weight', 'encoder.down_blocks.9.norm1.gamma', 'encoder.down_blocks.9.norm2.gamma', 'encoder.mid_block.attentions.0.norm.gamma', 'encoder.mid_block.attentions.0.proj.bias', 'encoder.mid_block.attentions.0.proj.weight', 'encoder.mid_block.attentions.0.to_qkv.bias', 'encoder.mid_block.attentions.0.to_qkv.weight', 'encoder.mid_block.resnets.0.conv1.bias', 'encoder.mid_block.resnets.0.conv1.weight', 'encoder.mid_block.resnets.0.conv2.bias', 'encoder.mid_block.resnets.0.conv2.weight', 'encoder.mid_block.resnets.0.norm1.gamma', 'encoder.mid_block.resnets.0.norm2.gamma', 'encoder.mid_block.resnets.1.conv1.bias', 'encoder.mid_block.resnets.1.conv1.weight', 'encoder.mid_block.resnets.1.conv2.bias', 'encoder.mid_block.resnets.1.conv2.weight', 'encoder.mid_block.resnets.1.norm1.gamma', 'encoder.mid_block.resnets.1.norm2.gamma', 'encoder.norm_out.gamma'][0;0m
+[06-08 01:38:13] VAE: converted 35 Conv3d weights to channels_last_3d
+[06-08 01:38:13] Loaded vae: AutoencoderKLWan (sgl-diffusion version). model size: 0.27 GB, consumed GPU mem: 0.30 GB, avail GPU mem: 17.73 GB
+Loading required modules:  60%|██████    | 3/5 [00:24<00:11,  5.99s/it][06-08 01:38:13] Loading tokenizer from /miele/brian/modelscope/Wan-AI/Wan2.1-T2V-1.3B-Diffusers/tokenizer. avail mem: 17.73 GB
+[06-08 01:38:15] Loaded tokenizer: T5Tokenizer (sgl-diffusion version). model size: NA GB, consumed GPU mem: 0.00 GB, avail GPU mem: 17.73 GB
+Loading required modules:  80%|████████  | 4/5 [00:26<00:04,  4.36s/it][06-08 01:38:15] Loading scheduler from /miele/brian/modelscope/Wan-AI/Wan2.1-T2V-1.3B-Diffusers/scheduler. avail mem: 17.73 GB
+[06-08 01:38:15] Loaded scheduler: UniPCMultistepScheduler (sgl-diffusion version). model size: NA GB, consumed GPU mem: 0.00 GB, avail GPU mem: 17.73 GB
+Loading required modules: 100%|██████████| 5/5 [00:26<00:00,  5.25s/it]
+[06-08 01:38:15] Creating pipeline stages...
+[06-08 01:38:15] Using Torch SDPA backend
+[06-08 01:38:15] Pipeline instantiated
+[06-08 01:38:15] LayerwiseOffloadManager initialized with num prefetched layer: 1, total num layers: 4
+[06-08 01:38:15] Enabled layerwise offload for AutoencoderKLWan on modules: ['decoder.up_blocks']
+[06-08 01:38:15] Enabled layerwise offload for pipeline components: ['text_encoder', 'vae']
+[06-08 01:38:15] Worker 0: Initialized device, model, and distributed environment.
+[06-08 01:38:15] Worker 0: Scheduler loop started.
+[06-08 01:38:15] Sequence dimension shard is enabled, disabling frame adjustment for better performance
+[06-08 01:38:15] Adjusting number of frames from 81 to 81 based on model
+[06-08 01:38:15] Processing 1 grouped request(s)
+[06-08 01:38:15] Sampling params:
+                       width: 832
+                      height: 480
+                  num_frames: 81
+                         fps: 16
+                      prompt: <redacted, len=79>
+                  neg_prompt: <redacted, len=392>
+                        seed: 42
+                 infer_steps: 50
+      num_outputs_per_prompt: 1
+              guidance_scale: 5.0
+     embedded_guidance_scale: 6.0
+                    n_tokens: None
+                  flow_shift: 5.0
+                  image_path: None
+                 save_output: True
+            output_file_path: /home/brianchc/sglang/scratch/final_PR_smoke/results_rerun_20260608_012128/wan_dct_rewind_d0.05.mp4
+        
+[06-08 01:38:15] Running pipeline stages: ['InputValidationStage', 'TextEncodingStage', 'LatentPreparationStage', 'TimestepPreparationStage', 'denoising_stage', 'decoding_stage']
+[06-08 01:38:15] [InputValidationStage] started...
+[06-08 01:38:15] [InputValidationStage] finished in 0.0001 seconds
+[06-08 01:38:15] [TextEncodingStage] started...
+[06-08 01:38:17] [TextEncodingStage] finished in 2.0768 seconds
+[06-08 01:38:17] [LatentPreparationStage] started...
+[06-08 01:38:17] [LatentPreparationStage] finished in 0.0046 seconds
+[06-08 01:38:17] [TimestepPreparationStage] started...
+[06-08 01:38:17] [TimestepPreparationStage] finished in 0.0044 seconds
+[06-08 01:38:17] [DenoisingStage] started...
+[06-08 01:38:17] Progressive denoising: mode=dct_rewind levels=1 delta=0.050 initial=30x52
+[06-08 01:38:17] Stage 1/2: 30x52 latent, steps [0, 33)
+[06-08 01:39:07]   rewind: sigma=0.7203 → t_eff=0.8374 at step 33
+[06-08 01:39:07] Stage 2/2: 60x104 latent, steps [33, 50)
+[06-08 01:41:47] Progressive denoising done in 209.94s (avg 4.1989s/step)
+[06-08 01:41:47] [DenoisingStage] finished in 209.9493 seconds
+[06-08 01:41:47] [DecodingStage] started...
+[06-08 01:42:16] [DecodingStage] finished in 28.6015 seconds
+[06-08 01:42:19] Output saved to [1;36m/home/brianchc/sglang/scratch/final_PR_smoke/results_rerun_20260608_012128/wan_dct_rewind_d0.05.mp4[0;0m
+[06-08 01:42:19] Pixel data generated successfully in [92m244.33[0;0m seconds
+[06-08 01:42:19] Memory usage - Max peak: 20200.00 MB, Avg peak: 20200.00 MB
+[93m[06-08 01:42:19] Generator was garbage collected without being shut down. Attempting to shut down the local server and client.[0;0m
+[06-08 01:42:23] Worker 0: Shutdown complete.
+  -> saved: /home/brianchc/sglang/scratch/final_PR_smoke/results_rerun_20260608_012128/wan_dct_rewind_d0.05.mp4  (wall time: 310.09s)
+
+=== qwen_fullres ===
+  output: /home/brianchc/sglang/scratch/final_PR_smoke/results_rerun_20260608_012128/qwen_fullres.png
+Unable to import `torchao` Tensor objects. This may affect loading checkpoints serialized with `torchao`
+[06-08 01:42:44] Auto memory policy for QwenImagePipelineConfig selected layerwise offload components: text_encoder, image_encoder, vae
+[06-08 01:42:44] server_args: {"model_path": "/miele/brian/modelscope/Qwen/Qwen-Image", "model_id": null, "backend": "auto", "attention_backend": "torch_sdpa", "attention_backend_config": {}, "component_attention_backends": {}, "cache_dit_config": null, "nccl_port": null, "trust_remote_code": false, "revision": null, "num_gpus": 1, "performance_mode": "auto", "base_gpu_id": 0, "gpu_ids": null, "tp_size": 1, "sp_degree": 1, "ulysses_degree": 1, "ring_degree": 1, "dp_size": 1, "dp_degree": 1, "enable_cfg_parallel": false, "cfg_parallel_degree": 1, "hsdp_replicate_dim": 1, "hsdp_shard_dim": 1, "dist_timeout": 3600, "pipeline_class_name": null, "lora_path": null, "lora_nickname": "default", "lora_scale": 1.0, "lora_merge_mode": "auto", "lora_weight_name": null, "component_paths": {}, "transformer_weights_path": null, "component_transformer_weights_paths": {}, "quantization": null, "quantization_ignored_layers": null, "lora_target_modules": null, "dit_cpu_offload": false, "dit_layerwise_offload": false, "layerwise_offload_components": ["text_encoder", "image_encoder", "vae"], "dit_offload_prefetch_size": 0.0, "text_encoder_cpu_offload": false, "image_encoder_cpu_offload": false, "vae_cpu_offload": false, "use_fsdp_inference": false, "pin_cpu_memory": true, "ltx2_two_stage_device_mode": null, "comfyui_mode": false, "enable_torch_compile": false, "enable_layerwise_nvtx_marker": false, "warmup": false, "server_warmup": false, "warmup_resolutions": null, "warmup_steps": 1, "disable_autocast": true, "master_port": 30005, "host": "127.0.0.1", "port": 30000, "webui": false, "webui_port": 12312, "scheduler_port": 5643, "batching_mode": "dynamic", "batching_max_size": 1, "batching_delay_ms": 0.0, "batching_config": null, "enable_batching_metrics": false, "strict_ports": false, "output_path": "outputs/", "input_save_path": "inputs/uploads", "prompt_file_path": null, "model_paths": {}, "model_loaded": {"transformer": true, "vae": true, "video_vae": true, "audio_vae": true, "video_dit": true, "audio_dit": true, "dual_tower_bridge": true}, "boundary_ratio": null, "disagg_role": "monolithic", "disagg_timeout": 3600, "disagg_downstream_wait_timeout": 1800, "disagg_dispatch_policy": "round_robin", "disagg_mode": false, "disagg_instance_id": 0, "disagg_max_slots_per_instance": 8, "disagg_transfer_redundancy": 1.25, "disagg_role_device": "auto", "disagg_transfer_backend": "auto", "disagg_transfer_pool_size": 268435456, "disagg_transfer_pin_memory": "auto", "disagg_p2p_hostname": "127.0.0.1", "disagg_ib_device": null, "disagg_server_addr": null, "encoder_urls": null, "denoiser_urls": null, "decoder_urls": null, "encoder_tp": null, "denoiser_tp": null, "denoiser_sp": null, "denoiser_ulysses": null, "denoiser_ring": null, "decoder_sp": null, "decoder_tp": null, "pool_work_endpoint": null, "pool_result_endpoint": null, "pool_control_endpoint": null, "pool_control_advertised_endpoint": null, "log_level": "info", "uvicorn_access_log_exclude_prefixes": [], "enable_trace": false, "otlp_traces_endpoint": "localhost:4317"}
+[06-08 01:42:44] Diffusers version: 0.34.0.dev0
+[06-08 01:42:44] Local mode: True
+[06-08 01:42:44] Starting server...
+Unable to import `torchao` Tensor objects. This may affect loading checkpoints serialized with `torchao`
+[06-08 01:42:57] Scheduler bind at endpoint: tcp://127.0.0.1:5643
+[06-08 01:42:58] Initializing distributed environment with world_size=1, device=cuda:0, timeout=3600
+[06-08 01:42:58] Setting distributed timeout to 3600 seconds
+[06-08 01:43:01] No pipeline_class_name specified, using model_index.json
+[06-08 01:43:01] Diffusers version: 0.34.0.dev0
+[06-08 01:43:01] Using pipeline from model_index.json: QwenImagePipeline
+[06-08 01:43:01] Loading pipeline modules...
+[06-08 01:43:01] Model already exists locally and is complete
+[06-08 01:43:01] Model path: /miele/brian/modelscope/Qwen/Qwen-Image
+[06-08 01:43:01] Diffusers version: 0.34.0.dev0
+[06-08 01:43:01] Loading pipeline modules from config: {'_class_name': 'QwenImagePipeline', '_diffusers_version': '0.34.0.dev0', 'scheduler': ['diffusers', 'FlowMatchEulerDiscreteScheduler'], 'text_encoder': ['transformers', 'Qwen2_5_VLForConditionalGeneration'], 'tokenizer': ['transformers', 'Qwen2Tokenizer'], 'transformer': ['diffusers', 'QwenImageTransformer2DModel'], 'vae': ['diffusers', 'AutoencoderKLQwenImage']}
+[06-08 01:43:01] Loading required components: ['text_encoder', 'tokenizer', 'vae', 'transformer', 'scheduler']
+[06-08 01:43:01] Memory-aware component load order: ['transformer', 'text_encoder', 'vae', 'tokenizer', 'scheduler']
+Loading required modules:   0%|          | 0/5 [00:00<?, ?it/s][06-08 01:43:01] Loading transformer from /miele/brian/modelscope/Qwen/Qwen-Image/transformer. avail mem: 25.53 GB
+[06-08 01:43:01] Loading QwenImageTransformer2DModel from 9 safetensors file(s) , param_dtype: torch.bfloat16
+[06-08 01:43:01] Using Torch SDPA backend
+[06-08 01:43:01] Using torch_sdpa backend for transformer
+[06-08 01:43:12] [RunAI Streamer] Overall time to stream 38.1 GiB of all files to cpu: 10.59s, 3.6 GiB/s
+Traceback (most recent call last):
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/loader/component_loaders/component_loader.py", line 212, in load
+    component = self.load_customized(
+                ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/loader/component_loaders/transformer_loader.py", line 146, in load_customized
+    model = maybe_load_fsdp_model(
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/loader/fsdp_load.py", line 277, in maybe_load_fsdp_model
+    load_model_from_full_model_state_dict(
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/loader/fsdp_load.py", line 510, in load_model_from_full_model_state_dict
+    sharded_tensor = torch.empty_like(
+                     ^^^^^^^^^^^^^^^^^
+  File "/home/brianchc/miniconda3/envs/genAI/lib/python3.12/site-packages/torch/_prims_common/wrappers.py", line 314, in _fn
+    result = fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/brianchc/miniconda3/envs/genAI/lib/python3.12/site-packages/torch/_refs/__init__.py", line 5286, in empty_like
+    return torch.empty_permuted(
+           ^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 108.00 MiB. GPU 0 has a total capacity of 47.43 GiB of which 33.00 MiB is free. Process 3461787 has 16.98 GiB memory in use. Including non-PyTorch memory, this process has 30.41 GiB memory in use. Of the allocated memory 25.37 GiB is allocated by PyTorch, and 126.11 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+[91m[06-08 01:43:27] Error while loading customized transformer, falling back to native version[0;0m
+The config attributes {'pooled_projection_dim': 768} were passed to QwenImageTransformer2DModel, but are not expected and will be ignored. Please verify your config.json configuration file.
+
+Loading checkpoint shards:   0%|          | 0/9 [00:00<?, ?it/s][A
+Loading checkpoint shards:  11%|█         | 1/9 [00:01<00:09,  1.24s/it][A
+Loading checkpoint shards:  22%|██▏       | 2/9 [00:01<00:06,  1.11it/s][A
+Loading checkpoint shards:  33%|███▎      | 3/9 [00:02<00:04,  1.27it/s][A
+Loading checkpoint shards:  44%|████▍     | 4/9 [00:04<00:05,  1.11s/it][A
+Loading checkpoint shards:  56%|█████▌    | 5/9 [00:04<00:03,  1.06it/s][A
+Loading checkpoint shards:  67%|██████▋   | 6/9 [00:05<00:02,  1.13it/s][A
+Loading checkpoint shards:  78%|███████▊  | 7/9 [00:07<00:02,  1.08s/it][A
+Loading checkpoint shards:  89%|████████▉ | 8/9 [00:09<00:01,  1.44s/it][A
+Loading checkpoint shards: 100%|██████████| 9/9 [00:09<00:00,  1.15s/it][ALoading checkpoint shards: 100%|██████████| 9/9 [00:09<00:00,  1.09s/it]
+[91m[06-08 01:43:37] Error while loading component: transformer, component_model_path='/miele/brian/modelscope/Qwen/Qwen-Image/transformer'[0;0m
+Loading required modules:   0%|          | 0/5 [00:35<?, ?it/s]
+[93m[06-08 01:43:37] 
+OOM detected. Possible solutions:
+  - If the OOM occurs during loading:
+    1. Check available memory on every selected GPU, not only total capacity.
+       In multi-GPU runs, the least-free selected GPU is the bottleneck.
+    2. For single-GPU deployment, use `--performance-mode memory`, component CPU offload,
+       or `--dit-layerwise-offload` for supported Wan/MOVA DiTs.
+    3. For multi-GPU deployment, keep the default `--performance-mode auto` or set
+       `--use-fsdp-inference true` to shard DiT weights with FSDP. FSDP is not a
+       single-GPU substitute for CPU offload.
+  - If the OOM occurs during runtime:
+    1. Reduce resolution, `--num-frames`, or batch size.
+    2. Use `--performance-mode memory` for lower memory usage.
+    3. Enable SP/Ulysses/Ring for sequence-heavy workloads in multi-GPU setups.
+    4. Use FSDP, with CFG parallelism when supported, for validated multi-GPU workloads.
+    5. Use a lower-memory attention backend or quantization when available.
+  Or, open an issue on GitHub https://github.com/sgl-project/sglang/issues/new/choose
+[0;0m
+[06-08 01:43:41] Worker 0: Shutdown complete.
+Process sglang-diffusionWorker-0:
+Traceback (most recent call last):
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/loader/component_loaders/component_loader.py", line 212, in load
+    component = self.load_customized(
+                ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/loader/component_loaders/transformer_loader.py", line 146, in load_customized
+    model = maybe_load_fsdp_model(
+            ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/loader/fsdp_load.py", line 277, in maybe_load_fsdp_model
+    load_model_from_full_model_state_dict(
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/loader/fsdp_load.py", line 510, in load_model_from_full_model_state_dict
+    sharded_tensor = torch.empty_like(
+                     ^^^^^^^^^^^^^^^^^
+  File "/home/brianchc/miniconda3/envs/genAI/lib/python3.12/site-packages/torch/_prims_common/wrappers.py", line 314, in _fn
+    result = fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/home/brianchc/miniconda3/envs/genAI/lib/python3.12/site-packages/torch/_refs/__init__.py", line 5286, in empty_like
+    return torch.empty_permuted(
+           ^^^^^^^^^^^^^^^^^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 108.00 MiB. GPU 0 has a total capacity of 47.43 GiB of which 33.00 MiB is free. Process 3461787 has 16.98 GiB memory in use. Including non-PyTorch memory, this process has 30.41 GiB memory in use. Of the allocated memory 25.37 GiB is allocated by PyTorch, and 126.11 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/brianchc/miniconda3/envs/genAI/lib/python3.12/multiprocessing/process.py", line 314, in _bootstrap
+    self.run()
+  File "/home/brianchc/miniconda3/envs/genAI/lib/python3.12/multiprocessing/process.py", line 108, in run
+    self._target(*self._args, **self._kwargs)
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 1005, in run_scheduler_process
+    scheduler = Scheduler(
+                ^^^^^^^^^^
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/managers/scheduler.py", line 113, in __init__
+    worker = Exec_worker(
+             ^^^^^^^^^^^^
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 124, in __init__
+    self.init_device_and_model()
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/managers/gpu_worker.py", line 193, in init_device_and_model
+    self.pipeline = build_pipeline(self.server_args)
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/__init__.py", line 79, in build_pipeline
+    pipeline = pipeline_cls(model_path, server_args)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/lora_pipeline.py", line 78, in __init__
+    super().__init__(*args, **kwargs)
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/composed_pipeline_base.py", line 147, in __init__
+    self.modules = self.load_modules(server_args, loaded_modules)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/pipelines_core/composed_pipeline_base.py", line 520, in load_modules
+    module, memory_usage = PipelineComponentLoader.load_component(
+                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/loader/component_loaders/component_loader.py", line 527, in load_component
+    raise e
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/loader/component_loaders/component_loader.py", line 517, in load_component
+    return loader.load(
+           ^^^^^^^^^^^^
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/loader/component_loaders/component_loader.py", line 239, in load
+    component = component.to(device=target_device)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brianchc/miniconda3/envs/genAI/lib/python3.12/site-packages/diffusers/models/modeling_utils.py", line 1451, in to
+    return super().to(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brianchc/miniconda3/envs/genAI/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1384, in to
+    return self._apply(convert)
+           ^^^^^^^^^^^^^^^^^^^^
+  File "/home/brianchc/miniconda3/envs/genAI/lib/python3.12/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/brianchc/miniconda3/envs/genAI/lib/python3.12/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  File "/home/brianchc/miniconda3/envs/genAI/lib/python3.12/site-packages/torch/nn/modules/module.py", line 934, in _apply
+    module._apply(fn)
+  [Previous line repeated 1 more time]
+  File "/home/brianchc/miniconda3/envs/genAI/lib/python3.12/site-packages/torch/nn/modules/module.py", line 965, in _apply
+    param_applied = fn(param)
+                    ^^^^^^^^^
+  File "/home/brianchc/miniconda3/envs/genAI/lib/python3.12/site-packages/torch/nn/modules/module.py", line 1370, in convert
+    return t.to(
+           ^^^^^
+torch.OutOfMemoryError: CUDA out of memory. Tried to allocate 216.00 MiB. GPU 0 has a total capacity of 47.43 GiB of which 31.00 MiB is free. Process 3461787 has 16.98 GiB memory in use. Including non-PyTorch memory, this process has 30.41 GiB memory in use. Of the allocated memory 25.45 GiB is allocated by PyTorch, and 46.30 MiB is reserved by PyTorch but unallocated. If reserved but unallocated memory is large try setting PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True to avoid fragmentation.  See documentation for Memory Management  (https://docs.pytorch.org/docs/stable/notes/cuda.html#optimizing-memory-usage-with-pytorch-cuda-alloc-conf)
+[91m[06-08 01:43:50] Rank 0 scheduler is dead. Please check if there are relevant logs.[0;0m
+[91m[06-08 01:43:51] Exit code: 1[0;0m
+Traceback (most recent call last):
+  File "/home/brianchc/miniconda3/envs/genAI/bin/sglang", line 6, in <module>
+    sys.exit(main())
+             ^^^^^^
+  File "/home/brianchc/sglang/python/sglang/cli/main.py", line 44, in main
+    generate(args, extra_argv)
+  File "/home/brianchc/sglang/python/sglang/cli/generate.py", line 29, in generate
+    generate_cmd(parsed_args, unknown_args)
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/entrypoints/cli/generate.py", line 197, in generate_cmd
+    generator = DiffGenerator.from_pretrained(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/entrypoints/diffusion_generator.py", line 110, in from_pretrained
+    return cls.from_server_args(server_args, local_mode=local_mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/entrypoints/diffusion_generator.py", line 132, in from_server_args
+    instance.local_scheduler_process = instance._start_local_server_if_needed()
+                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/entrypoints/diffusion_generator.py", line 149, in _start_local_server_if_needed
+    processes = launch_server(self.server_args, launch_http_server=False)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/brianchc/sglang/python/sglang/multimodal_gen/runtime/launch_server.py", line 178, in launch_server
+    data = reader.recv()
+           ^^^^^^^^^^^^^
+  File "/home/brianchc/miniconda3/envs/genAI/lib/python3.12/multiprocessing/connection.py", line 250, in recv
+    buf = self._recv_bytes()
+          ^^^^^^^^^^^^^^^^^^
+  File "/home/brianchc/miniconda3/envs/genAI/lib/python3.12/multiprocessing/connection.py", line 430, in _recv_bytes
+    buf = self._recv(4)
+          ^^^^^^^^^^^^^
+  File "/home/brianchc/miniconda3/envs/genAI/lib/python3.12/multiprocessing/connection.py", line 399, in _recv
+    raise EOFError
+EOFError
