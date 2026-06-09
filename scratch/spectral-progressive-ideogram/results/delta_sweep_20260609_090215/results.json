@@ -1,0 +1,12 @@
+{
+  "Ideogram 4": {
+    "steps": 20,
+    "fullres_denoise_s": 53.99,
+    "points": [
+      {"delta": 0.01, "denoise_s": 43.47, "speedup": 1.2420},
+      {"delta": 0.02, "denoise_s": 41.69, "speedup": 1.2950},
+      {"delta": 0.05, "denoise_s": 38.14, "speedup": 1.4156},
+      {"delta": 0.1, "denoise_s": 34.60, "speedup": 1.5604}
+    ]
+  }
+}
