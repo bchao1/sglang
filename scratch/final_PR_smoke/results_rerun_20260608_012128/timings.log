@@ -1,7 +1,0 @@
-# Smoke re-run timings — Mon Jun  8 01:21:52 AM PDT 2026
-# GPU: NVIDIA RTX A6000
-label,wall_secs
-zimage_fullres,162.28
-zimage_dct_rewind_d0.05,108.15
-wan_fullres,658.15
-wan_dct_rewind_d0.05,310.09
