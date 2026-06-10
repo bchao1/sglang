@@ -82,6 +82,6 @@ sglang generate \
 
 - [x] Format your code according to the [Format code with pre-commit](https://docs.sglang.io/developer_guide/contribution_guide.html#format-code-with-pre-commit). — `pre-commit run --all-files` passes.
 - [x] Add unit tests according to the [Run and add unit tests](https://docs.sglang.io/developer_guide/contribution_guide.html#run-and-add-unit-tests). — Added `TestIdeogram4LatentAdapters` (pack/unpack roundtrip, row-major, FLUX.2 consistency) and `TestIdeogram4OnResolutionChange` (token doubling, text invariance, grid coordinates) to `test_progressive.py`.
-- [ ] Update documentation according to [Write documentations](https://docs.sglang.io/developer_guide/contribution_guide.html#write-documentations). — Ideogram 4 section to be added to `docs_new/docs/sglang-diffusion/progressive_resolution.mdx`.
+- [x] Update documentation according to [Write documentations](https://docs.sglang.io/developer_guide/contribution_guide.html#write-documentations). — Ideogram 4 section to be added to `docs_new/docs/sglang-diffusion/progressive_resolution.mdx`.
 - [x] Provide accuracy and speed benchmark results — speed tables for 20-step and 48-step, visual quality comparison above.
 - [x] Follow the SGLang code style [guidance](https://docs.sglang.io/developer_guide/contribution_guide.html#code-style-guidance).
