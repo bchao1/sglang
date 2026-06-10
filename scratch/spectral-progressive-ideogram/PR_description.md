@@ -2,9 +2,9 @@
 
 ## Motivation
 
-Extends spectral progressive resolution growing (see [main PR — FLUX.1/2/Z-Image/Wan/Qwen](#TODO)) to **Ideogram 4**, adding coarse-to-fine denoising with DCT-II spectral upsample.
+Extends Spectral Progressive Diffusion (see [merged PR — FLUX.1/2/Z-Image/Wan/Qwen](https://github.com/sgl-project/sglang/pull/27524)) to **Ideogram 4**, adding coarse-to-fine denoising with GPU-based DCT spectral upsample.
 
-Ideogram 4 has a dual-transformer architecture — a conditional transformer (text + image tokens) and an unconditional transformer (image tokens only, zero LLM features). Both must be refreshed at the stage transition, which required a new `_refresh_cache_dit_context` hook in the progressive base class.
+Ideogram 4 has a dual-transformer architecture: a conditional transformer (text + image tokens) and an unconditional transformer (image tokens only, zero LLM features). Both must be refreshed at the stage transition, which required a new `_refresh_cache_dit_context` hook in the progressive base class.
 
 ## Modifications
 
@@ -13,21 +13,25 @@ Ideogram 4 has a dual-transformer architecture — a conditional transformer (te
 | `progressive_resolution/ideogram.py` | New: `Ideogram4ProgressiveDenoisingStage` — all 5 extension hooks + dual-transformer Cache-DiT refresh |
 | `progressive_resolution/denoising.py` | Added `_refresh_cache_dit_context` hook to support models with multiple transformers |
 | `runtime/pipelines/ideogram.py` | `_create_denoising_stage` → `_Ideogram4DenoisingStageRouter` (zero overhead at `progressive_mode="fullres"`) |
+
+New fixes:
+| File | Change |
+|------|--------|
 | `progressive_resolution/flux.py` | Module-level `_flux_pack`/`_flux_unpack` aliases (import fix for existing tests) |
 | `progressive_resolution/qwen_image.py` | Module-level `_qwen_image_pack`/`_qwen_image_unpack` aliases (import fix) |
 
 ## Accuracy Tests
 
-Visual quality comparison (1024×1024, 20-step, RTX A6000):
+Visual quality comparison (1024×1024, 48-step, RTX A6000):
 
 <details>
-<summary>fullres vs dct_rewind δ=0.05 and δ=0.10 — smoke prompt</summary>
+<summary>fullres vs dct_rewind δ=0.01 and δ=0.05 — smoke prompt</summary>
 
 Prompt: *"A serene mountain lake at golden hour, photorealistic"*
 
-| fullres | δ=0.05 | δ=0.10 |
+| fullres | δ=0.01 | δ=0.05 |
 |---------|--------|--------|
-| ![fullres](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-ideogram/results/delta_sweep_20260609_090215/Ideogram4_fullres.png) | ![d0.05](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-ideogram/results/delta_sweep_20260609_090215/Ideogram4_dct_rewind_d0_05.png) | ![d0.10](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-ideogram/results/delta_sweep_20260609_090215/Ideogram4_dct_rewind_d0_1.png) |
+| ![fullres](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-ideogram/results/delta_sweep_48step_20260609_091051/Ideogram4_fullres.png) | ![d0.01](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-ideogram/results/delta_sweep_48step_20260609_091051/Ideogram4_dct_rewind_d0_01.png) | ![d0.05](https://raw.githubusercontent.com/bchao1/sglang/dev/brian/scratch/spectral-progressive-ideogram/results/delta_sweep_48step_20260609_091051/Ideogram4_dct_rewind_d0_05.png) |
 
 </details>
 
